@@ -1,0 +1,107 @@
+# ----------------------------
+# Python Bytecode & Caches
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python/
+*.so
+*.dll
+
+# pytest & mypy caches
+.pytest_cache/
+.mypy_cache/
+ruff_cache/
+pytest_cache/
+
+# ----------------------------
+# Virtual Environments
+# ----------------------------
+.env
+.env.*/
+.venv/
+venv/
+ENV/
+env/
+
+# Conda environments (locals)
+conda-meta/
+pkgs/
+
+# ----------------------------
+# Build / Distribution Artifacts
+# ----------------------------
+dist/
+build/
+*.egg-info/
+
+# ----------------------------
+# Notebooks & Jupyter
+# ----------------------------
+.ipynb_checkpoints/
+jupyterlab_settings/
+.jupyter/
+
+# ----------------------------
+# OS & Editor Files
+# ----------------------------
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# ----------------------------
+# Logs & Temp Files
+# ----------------------------
+*.log
+*.tmp
+*.out
+
+# ----------------------------
+# Machine Learning Artifacts
+# ----------------------------
+# Checkpoints, weights, runs, and outputs
+*.pt
+*.pth
+*.ckpt
+*.ckpt.*
+*.onnx
+*.pb
+
+# PyTorch Lightning / Keras / HF outputs
+lightning_logs/
+logs/
+runs/
+mlruns/
+wandb/
+
+# HuggingFace cache
+huggingface/
+hf_cache/
+
+# ----------------------------
+# Datasets (do not commit large CSVs)
+# ----------------------------
+data/
+datasets/
+*.csv
+*.parquet
+*.h5
+*.npz
+*.npy
+
+# ----------------------------
+# TAE Program Artifacts
+# ----------------------------
+# PDF course materials (password-protected)
+assets/*.pdf
+resources/*.pdf
+
+# ----------------------------
+# Local config / credentials
+# ----------------------------
+.env.local
+*.secret
+*.keys
+*.token
