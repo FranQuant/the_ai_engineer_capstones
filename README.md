@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/tae_banner.png" alt="The AI Engineer Banner" width="80%">
+  <img src="aassets/tae_logo.png" width="160"">
 </p>
 
 <h1 align="center">The AI Engineer — Capstones (Nov 2025 Cohort)</h1>
