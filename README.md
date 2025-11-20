@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="assets/tae_logo.png" width="160"">
+  <img src="assets/tae_logo.png" width="160">
 </p>
 
-<h1 align="center">The AI Engineer — Capstones (Nov 2025 Cohort)</h1>
+<h1 align="center">The AI Engineer — Capstones </h1>
 
 <p align="center">
   <b>Gradient Descent • Backpropagation • Tiny Transformer • Agent Demo</b><br>
-  Structured, reproducible solutions for all capstone projects.
+  Structured, reproducible solutions for all capstone projects (Nov 2025 Cohort).
 </p>
 
 ---
 
-## 📌 Overview
+## Overview
 
 This repository contains my complete work for the **The AI Engineer (Nov 2025 Cohort)**.  
 It follows the official 4-week structure:
@@ -29,17 +29,13 @@ Each capstone lives in its own folder with:
 
 ---
 
-## 📚 Weekly Capstones
+## Weekly Capstones
 
 ### 🟦 **Week 1 — Gradient Descent Optimization**
 > *From calculus to GD/SGD*  
 Derive gradients manually, visualize loss landscapes, implement GD, SGD, and momentum from scratch.
 
 Folder: `week01_gd_optimization/`
-
-Resources:
-- *Week 1 Coaching Guide* (PDF)
-- *GD Optimization Handout* (PDF)
 
 ---
 
@@ -49,10 +45,6 @@ Chain rule by hand, build a tiny MLP from scratch, verify via PyTorch autograd.
 
 Folder: `week02_backpropagation/`
 
-Resources:
-- *Week 2 Coaching Guide*  
-- *Backpropagation Handout*
-
 ---
 
 ### 🟧 **Week 3 — Tiny Transformer**
@@ -60,10 +52,6 @@ Resources:
 Implement tokenizer, attention, decoder blocks, training loop, sampling, and evaluation.
 
 Folder: `week03_tiny_transformer/`
-
-Resources:
-- *Week 3 Coaching Guide*  
-- *Attention & Tiny Transformers Handout*
 
 ---
 
@@ -73,13 +61,9 @@ Implement a minimal agent pipeline using clean engineering patterns.
 
 Folder: `week04_agent_demo/`
 
-Resources:
-- *TAE Engineering Guide*  
-- *Agentic patterns & diagnostics*
-
 ---
 
-## 🛠️ Environment
+## Environment
 
 To ensure reproducibility:
 
@@ -95,7 +79,7 @@ All dependencies adhere to:
 - numpy / matplotlib / tqdm  
 - ruff / pytest optional for engineering track
 
-A `requirements.txt` is included for pip users.
+A `requirements.txt` is included.
 
 ---
 
@@ -125,5 +109,3 @@ the_ai_engineer_capstones/
 - **LLM Code Repo:** https://github.com/yhilpisch/llmcode  
 
 ---
-
-<p align="center">🚀 Building strong foundations to push into expert-level ML & agentic engineering.</p>
