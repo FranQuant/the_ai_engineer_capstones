@@ -1,7 +1,34 @@
+<p align="center">
+  <img src="assets/tae_logo.png" width="160">
+</p>
 
-# The AI Engineer — Capstone Projects (Nov 2025 Cohort)
 
-This repository contains my complete implementations of the capstone projects for *The AI Engineer* program.  
+# The AI Engineer — Capstone Projects 
+
+---
+
+<p align="center">
+
+  <!-- Python Version -->
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white" alt="Python 3.11">
+
+  <!-- Conda Ready -->
+  <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white" alt="Conda Ready">
+
+  <!-- Colab Friendly -->
+  <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white" alt="Colab Friendly">
+
+  <!-- License -->
+  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey" alt="Educational Use License">
+
+  <!-- Last Updated -->
+  <img src="https://img.shields.io/badge/Last%20Updated-November%202025-purple" alt="Last Updated">
+
+</p>
+
+---
+
+This repository contains my complete implementations of the capstone projects for *The AI Engineer* program (Nov 2025 Cohort).  
 Each capstone is designed to be clean, reproducible, well‑structured, and aligned with software‑engineering best practices.
 
 ---
