@@ -30,7 +30,10 @@ All figures are generated programmatically.
 
 Click the badge below to launch the notebook directly in Colab:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/week01_gd_optimization/gd_capstone_final.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
+https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone_final.ipynb
+)
+
 
 ## 🔁 Reproducibility
 
