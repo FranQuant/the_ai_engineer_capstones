@@ -22,20 +22,23 @@ This capstone is fully runnable in Jupyter Lab or Google Colab.
 
 ## 📁 Repository Structure
 
+The Week-03 capstone is structured intentionally to reflect the build sequence of a tiny decoder-only Transformer:
 ```text
 week03_transformers/
 │
-├── mini_transformer.py
-├── transformer_block.py
-├── multihead_attention.py
-├── scaled_dot_product_attention.py
+├── scaled_dot_product_attention.py      # Step 1: Scaled Dot-Product Attention
+├── multihead_attention.py               # Step 2: Multi-Head Attention (MHA)
+├── transformer_block.py                 # Step 3: Transformer Block (pre-LN)
+├── mini_transformer.py                  # Step 4: Mini Transformer LM
 │
-├── train_mini_gpt.py
-├── mini_gpt_diagnostics.ipynb
+├── train_mini_gpt.py                    # Step 5: Training script (from scratch)
+├── mini_gpt.pt                          # Saved checkpoint from training
 │
-└── README.md   ← (this file)
-```
+├── mini_gpt_diagnostics.ipynb           # Step 6: Diagnostics & visualization suite
+│
+└── README_week03_capstone.md            # ← This file
 
+```
 ---
 
 ## 🧠 Model Architecture (Minimal Diagram)
@@ -139,8 +142,3 @@ This capstone is intentionally small, transparent, and designed for learning:
 The notebook provides interpretability tools similar to those used in real model-debugging workflows.
 
 ---
-
-## 📜 License
-
-MIT — feel free to use, modify, and publish.
-
