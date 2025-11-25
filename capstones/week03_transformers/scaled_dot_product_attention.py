@@ -1,5 +1,5 @@
 """
-Step 1 (Corrected): Scaled dot-product attention with optional causal mask
+Step 1 (Corrected for MHA): Scaled dot-product attention with optional causal mask
 and tests aligned exactly with the Week-03 handout.
 
 Grounding:
@@ -28,7 +28,7 @@ def scaled_dot_product_attention(
     Compute Y = softmax(QK^T / sqrt(d_k)) @ V with optional mask.
 
     q, k, v: shape [T,D] or [B,T,D]
-    mask: [T,T], [1,T,T], or [B,1,T,T] with 1=keep, 0=mask
+    mask: [T,T], [1,T,T], [B,1,T,T], [B,T,T], or per-head [B*H,T,T]
     """
     assert q.shape == k.shape == v.shape, "q, k, v must share shape"
 
@@ -38,25 +38,49 @@ def scaled_dot_product_attention(
 
     B, T, D = q.shape
 
-    # raw scores before softmax stabilization
+    # raw scores (before softmax stabilization)
     raw_scores = (q @ k.transpose(-2, -1)) / math.sqrt(D)  # [B,T,T]
-
-    # masking
     scores = raw_scores.clone()
+
+    # =========================================================================
+    # MASK HANDLING (FINAL CORRECT VERSION)
+    # =========================================================================
     if mask is not None:
-        if mask.ndim == 2:                      # [T,T]
-            mask = mask.unsqueeze(0)            # [1,T,T]
-        elif mask.ndim == 3 and mask.shape[0] == B:  # [B,T,T]
-            mask = mask.unsqueeze(1)            # [B,1,T,T]
-        # If mask is already [1,T,T], do nothing.
 
-        assert mask.shape[-2:] == (T, T), "mask must end with [T,T]"
-        assert mask.shape[0] in (1, B), "batch dim must be 1 or B"
+        # Convert 2D → 3D
+        if mask.ndim == 2:          # [T,T]
+            mask = mask.unsqueeze(0)  # → [1,T,T]
 
+        elif mask.ndim == 3:
+            batch_dim = mask.shape[0]
+
+            # Allowed: 1 (universal), B (per-batch), B*H (per-head from MHA)
+            if batch_dim == 1:
+                pass  # universal mask
+            elif batch_dim == B:
+                mask = mask.unsqueeze(1)  # → [B,1,T,T]
+            else:
+                assert batch_dim % B == 0, \
+                    f"Invalid mask batch={batch_dim}, expected 1, B, or B*H"
+
+        elif mask.ndim == 4:
+            # Expected shapes: [1,1,T,T], [B,1,T,T], or [B*H,1,T,T]
+            batch_dim = mask.shape[0]
+            assert mask.shape[-2:] == (T, T)
+            assert batch_dim in (1, B) or batch_dim % B == 0, \
+                f"Invalid mask batch={batch_dim}"
+
+        else:
+            raise ValueError("mask must have dim 2, 3, or 4")
+
+        # Final checks
+        assert mask.shape[-2:] == (T, T)
+
+        # Apply mask
         mask = mask.to(device=scores.device, dtype=scores.dtype)
         scores = scores + (mask == 0) * (-1e9)
 
-    # numerically stable softmax
+    # stable softmax
     scores = scores - scores.max(dim=-1, keepdim=True).values
     attn = torch.softmax(scores, dim=-1)
     out = attn @ v
@@ -160,7 +184,7 @@ def _test_causal_mask():
         [0.24825508, 0.50348984, 0.24825508],
     ])
 
-    # A_masked returned as [1,1,3,3], so squeeze:
+    # A_masked returned as [1,1,3,3], so squeeze
     A_masked_squeezed = A_masked.squeeze()
     assert torch.allclose(A_masked_squeezed, expected_masked, atol=1e-6)
     print("✓ Causal mask behaves correctly\n")
@@ -175,7 +199,8 @@ def _test_shapes():
     k = torch.randn(B, T, D)
     v = torch.randn(B, T, D)
 
-    mask = torch.ones(1, T, T)  # [1,T,T] → should remain [1,T,T]
+    # This MUST broadcast correctly to [B,T,T]
+    mask = torch.ones(1, T, T)
 
     y = scaled_dot_product_attention(q, k, v, mask)
     assert y.shape == (B, T, D)
