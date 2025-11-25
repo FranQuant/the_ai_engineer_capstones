@@ -27,7 +27,7 @@ Each capstone is clean, reproducible, and aligned with software‑engineering be
 |------|----------|---------|------------|
 | **1** | **Gradient Descent Optimization** | Implement GD & SGD from scratch, analyze convergence, step‑size sensitivity, and basin‑dependent dynamics. | [Open in Colab](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone_final.ipynb) |
 | **2** | **Backpropagation** | Manual chain rule, custom autograd, tiny MLP, PyTorch autograd, and nn.Module training loop. | [01](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/01_numpy_manual.ipynb) • [02](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/02_pytorch_no_autograd.ipynb) • [03](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/03_pytorch_autograd.ipynb) • [04](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/04_pytorch_nn_module.ipynb) |
-| **3** | **Tiny Transformer** | Build tokenizer, attention, decoder block, training loop, inference sampling. | _Coming soon_ |
+| **3** | **Tiny Transformer** | Build tokenizer, SDPA, MHA, pre-LN transformer block, decoder-only model, training loop, sampling, and a full diagnostics suite. | [Diagnostics Notebook](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week03_transformers/mini_gpt_diagnostics.ipynb) | 
 | **4** | **Agent Demo** | Minimal LLM‑powered agent with clean abstractions, tracing, and monitoring. | _Coming soon_ |
 
 ---
@@ -44,8 +44,8 @@ the_ai_engineer_capstones/
 └── capstones/
     ├── week01_gd_optimization/
     ├── week02_backprop/
-    ├── week03_tiny_transformer/       (placeholder)
-    └── week04_agent_demo/             (placeholder)
+    ├── week03_transformers/       
+    └── week04_agent_demo/             
 ```
 
 ---
