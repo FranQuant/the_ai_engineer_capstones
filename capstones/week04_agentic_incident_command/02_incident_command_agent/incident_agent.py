@@ -19,7 +19,8 @@ from typing import Any, Dict, List, Optional
 
 from incident_memory import IncidentMemoryStore
 from incident_planner import IncidentPlanner
-from telemetry import RunContext, TelemetryLogger
+from mcp_server import call_tool
+from telemetry import Budget, RunContext, TelemetryLogger
 
 
 class IncidentAgent:
@@ -38,15 +39,27 @@ class IncidentAgent:
 
     async def observe(self, ctx: RunContext) -> Dict[str, Any]:
         """Collect capabilities and resources needed for planning."""
-        raise NotImplementedError
+        del ctx  # telemetry not used in minimal loop
+        return {"resources": self.memory.list_resources()}
 
     async def plan(self, ctx: RunContext, observations: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Produce an ordered plan (callTool and memory operations) under budget constraints."""
-        raise NotImplementedError
+        del ctx  # telemetry not used in minimal loop
+        return self.planner.plan(observations, Budget(tokens=0, ms=0, dollars=0.0))
 
     async def act(self, ctx: RunContext, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Execute planned steps via MCP tools and record results."""
-        raise NotImplementedError
+        del ctx  # telemetry not used in minimal loop
+        results: List[Dict[str, Any]] = []
+        for step in steps:
+            if step.get("type") == "callTool":
+                name = step.get("name", "")
+                arguments = step.get("input", {}) or {}
+                result = call_tool(name, arguments)
+                results.append({"step": step, "result": result})
+            else:
+                results.append({"step": step, "result": {"ok": True}})
+        return results
 
     async def learn(
         self,
@@ -55,9 +68,24 @@ class IncidentAgent:
         results: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         """Write deltas, summaries, and updated state back to memory."""
-        raise NotImplementedError
+        del ctx, observations  # unused in minimal loop
+        # Record deltas for each callTool result for traceability.
+        for item in results:
+            delta = {"action": "completed_step", "details": item}
+            self.memory.write_delta(delta)
+        # Store last plan used.
+        self.memory.write_plan([item.get("step", {}) for item in results])
+        return {"deltas_written": len(results)}
 
     async def run_loop(self, ctx: RunContext) -> Dict[str, Any]:
         """Run a single OPAL loop and return loop outputs."""
-        raise NotImplementedError
-
+        observations = await self.observe(ctx)
+        plan_steps = await self.plan(ctx, observations)
+        results = await self.act(ctx, plan_steps)
+        learn_result = await self.learn(ctx, observations, results)
+        return {
+            "observations": observations,
+            "plan": plan_steps,
+            "results": results,
+            "learn": learn_result,
+        }

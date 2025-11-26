@@ -25,7 +25,7 @@ class IncidentPlanner:
     def plan(
         self,
         observations: Dict[str, Any],
-        budget: Dict[str, Any],   # simple dict placeholder; unused
+        budget: Any,  # budget unused in minimal implementation
     ) -> List[Dict[str, Any]]:
         """Return an ordered list of planned steps (callTool and memory operations)."""
         del observations, budget  # unused in minimal implementation
