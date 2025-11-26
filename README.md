@@ -1,15 +1,13 @@
-<p align="center">
-  <img src="assets/tae_logo.png" width="160">
+<h1 align="left">
+  The AI Engineer — Capstone Projects
+  <img src="assets/tae_logo.png" width="140" align="right" alt="TAE Logo">
+</h1>
+
+<p>
+This repository contains my complete implementations of the capstone projects for <em>The AI Engineer</em> program (Nov 2025 Cohort).  
+Each capstone is clean, reproducible, and aligned with software-engineering best practices.
 </p>
 
----
-
-# The AI Engineer — Capstone Projects
-
----
-
-This repository contains my complete implementations of the capstone projects for *The AI Engineer* program (Nov 2025 Cohort).  
-Each capstone is clean, reproducible, and aligned with software‑engineering best practices.
 
 ---
 
