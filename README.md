@@ -12,14 +12,15 @@
   <img src="https://img.shields.io/badge/Last%20Updated-November%202025-purple" alt="Last Updated">
 </p>
 
-<p align="center">··········································</p>
+<p align="center">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</p>
 
 This repository contains my complete implementations of the capstone projects for <em>The AI Engineer</em> program (Nov 2025 Cohort).  
 Each capstone is clean, reproducible, and aligned with software-engineering best practices.
 
-<p align="center">··········································</p>
+<p align="center">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</p>
 
 
+---
 
 ## Weekly Capstones Overview
 
