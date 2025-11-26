@@ -16,19 +16,33 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from telemetry import Budget
-
 
 class IncidentPlanner:
     def __init__(self, config: Dict[str, Any]) -> None:
         """Configure planner with model/tooling parameters."""
         self.config = config
 
-    async def plan(
+    def plan(
         self,
         observations: Dict[str, Any],
-        budget: Budget,
+        budget: Dict[str, Any],   # simple dict placeholder; unused
     ) -> List[Dict[str, Any]]:
         """Return an ordered list of planned steps (callTool and memory operations)."""
-        raise NotImplementedError
-
+        del observations, budget  # unused in minimal implementation
+        return [
+            {
+                "type": "callTool",
+                "name": "create_incident",
+                "input": {"id": "INC-001", "title": "Investigate incident", "severity": "medium"},
+            },
+            {
+                "type": "callTool",
+                "name": "add_evidence",
+                "input": {"id": "EV-001", "content": "Initial evidence placeholder", "source": "system"},
+            },
+            {
+                "type": "callTool",
+                "name": "append_delta",
+                "input": {"action": "noop", "details": {"note": "Plan executed"}},
+            },
+        ]

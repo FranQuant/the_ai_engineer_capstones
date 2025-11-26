@@ -15,6 +15,9 @@ TODO:
 
 from __future__ import annotations
 
+import json
+import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -22,7 +25,7 @@ from typing import Any, Dict, Optional, Tuple
 
 def new_correlation_id() -> str:
     """Return a unique correlation ID for sessions."""
-    raise NotImplementedError
+    return str(uuid.uuid4())
 
 
 @dataclass
@@ -57,9 +60,30 @@ class TelemetryLogger:
 
     def log(self, event: TelemetryEvent) -> None:
         """Record telemetry event."""
-        raise NotImplementedError
+        record = {
+            "correlation_id": event.correlation_id,
+            "loop_id": event.loop_id,
+            "phase": event.phase,
+            "method": event.method,
+            "status": event.status,
+            "latency_ms": event.latency_ms,
+            "budget": {
+                "tokens": event.budget.tokens,
+                "ms": event.budget.ms,
+                "dollars": event.budget.dollars,
+            },
+            "payload": event.payload,
+        }
+        line = json.dumps(record)
+        print(line)
+        self.sink.parent.mkdir(parents=True, exist_ok=True)
+        with self.sink.open("a", encoding="utf-8") as fp:
+            fp.write(line + "\n")
 
 
 def timed(fn, *args, **kwargs) -> Tuple[int, Any]:
     """Measure latency and return (latency_ms, result)."""
-    raise NotImplementedError
+    start = time.monotonic()
+    result = fn(*args, **kwargs)
+    latency_ms = int((time.monotonic() - start) * 1000)
+    return latency_ms, result
