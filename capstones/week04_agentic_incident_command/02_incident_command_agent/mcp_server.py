@@ -16,6 +16,8 @@ TODO:
 
 from __future__ import annotations
 
+import asyncio
+import json
 from typing import Any, Dict
 
 from incident_memory import IncidentMemoryStore
@@ -38,40 +40,80 @@ def get_resource(memory: IncidentMemoryStore, uri: str, cursor: str | None = Non
     return memory.get_resource(uri, cursor)
 
 
-def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+def call_tool(memory: IncidentMemoryStore, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
     """Dispatch tool call based on registered handlers."""
-    # Deterministic stub responses only; side effects handled by caller if needed.
+    if name == "create_incident":
+        incident_id = arguments.get("id", "INC-001")
+        return memory.update_incident(incident_id, arguments)
+    if name == "add_evidence":
+        return memory.write_evidence(arguments)
+    if name == "append_delta":
+        return memory.append_delta(arguments)
+    # Deterministic echo fallback.
     return {"ok": True, "tool": name, "echo": arguments}
 
 
 async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStore) -> None:
     """Handle JSON-RPC messages for one websocket session."""
     del logger  # telemetry integration is out of scope for minimal implementation
-    message = await ws.recv()
-    request = {} if not message else message
-    method = request.get("method") if isinstance(request, dict) else None
-    params = request.get("params", {}) if isinstance(request, dict) else {}
+    async for raw in ws:
+        try:
+            request = json.loads(raw)
+        except Exception:
+            continue
+        if not isinstance(request, dict):
+            continue
+        req_id = request.get("id")
+        method = request.get("method")
+        params = request.get("params", {}) or {}
 
-    if method == "initialize":
-        response = {"result": capabilities_payload(memory)}
-    elif method == "getResource":
-        uri = params.get("uri", "")
-        cursor = params.get("cursor")
-        response = {"result": get_resource(memory, uri, cursor)}
-    elif method == "callTool":
-        name = params.get("name", "")
-        args = params.get("arguments", {}) or {}
-        response = {"result": call_tool(name, args)}
-    else:
-        response = {"error": {"code": -32601, "message": "Method not found"}}
+        # Ignore notifications (no id).
+        if req_id is None:
+            continue
 
-    await ws.send(response)
+        if method == "initialize":
+            result = capabilities_payload(memory)
+            response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+        elif method == "getResource":
+            uri = params.get("uri", "")
+            cursor = params.get("cursor")
+            result = get_resource(memory, uri, cursor)
+            response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+        elif method == "callTool":
+            name = params.get("name", "")
+            args = params.get("arguments", {}) or {}
+            result = call_tool(memory, name, args)
+            response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+        else:
+            response = {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": "Method not found"},
+            }
+
+        await ws.send(json.dumps(response))
 
 
 async def main() -> None:
     """Start the MCP server and listen for client connections."""
-    # Minimal placeholder: no network server started in scaffold.
-    return None
+    memory = IncidentMemoryStore(
+        {
+            "incidents": {"INC-000": {"id": "INC-000", "title": "Seed incident", "severity": "low"}},
+            "evidence": {"EV-000": {"id": "EV-000", "content": "Seed evidence", "source": "seed"}},
+            "deltas": [],
+            "plans": {},
+        }
+    )
+    logger = TelemetryLogger  # placeholder, not used in minimal loop
+
+    import websockets
+
+    async def handler(ws):
+        await handle_session(ws, logger, memory)
+
+    server = await websockets.serve(handler, "127.0.0.1", 8765, subprotocols=None)
+    print("MCP server listening on ws://127.0.0.1:8765/mcp")
+    await server.wait_closed()
 
 
 if __name__ == "__main__":
