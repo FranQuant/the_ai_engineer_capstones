@@ -1,0 +1,16 @@
+# Core runtime (keep minimal; expand per chapter as needed)
+requests>=2.31.0
+numpy>=1.26.0
+matplotlib>=3.7.0
+pydantic>=2.4.0
+rich>=13.7.0
+
+# Optional — RAG/framework demos (Part VI)
+langchain>=0.2.0
+llama-index>=0.10.0
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+duckduckgo-search>=4.0.0
+prefect>=2.13.0
+pyautogen>=0.2.0
+crewai>=0.28.0

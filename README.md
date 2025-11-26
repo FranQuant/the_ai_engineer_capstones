@@ -1,8 +1,15 @@
-# The AI Engineer — Capstone Projects
-
 <p align="center">
   <img src="assets/tae_logo.png" width="160">
 </p>
+
+---
+
+# The AI Engineer — Capstone Projects
+
+---
+
+This repository contains my complete implementations of the capstone projects for *The AI Engineer* program (Nov 2025 Cohort).  
+Each capstone is clean, reproducible, and aligned with software‑engineering best practices.
 
 ---
 
@@ -16,12 +23,7 @@
 
 ---
 
-This repository contains my complete implementations of the capstone projects for *The AI Engineer* program (Nov 2025 Cohort).  
-Each capstone is clean, reproducible, and aligned with software‑engineering best practices.
-
----
-
-## 📘 Weekly Capstones Overview
+## Weekly Capstones Overview
 
 | Week | Capstone | Summary | Colab Link |
 |------|----------|---------|------------|
@@ -32,7 +34,7 @@ Each capstone is clean, reproducible, and aligned with software‑engineering be
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 the_ai_engineer_capstones/
@@ -50,7 +52,7 @@ the_ai_engineer_capstones/
 
 ---
 
-## 🔬 Environment & Reproducibility
+## Environment & Reproducibility
 
 ```
 conda env create -f environment.yml
@@ -64,7 +66,7 @@ conda activate tae
 
 ---
 
-## ✔️ Status
+## Status
 
 **Week 1 — Completed**  
 **Week 2 — Completed**  
