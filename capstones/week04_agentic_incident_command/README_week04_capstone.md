@@ -21,10 +21,10 @@ The Week 04 capstone delivers a deterministic Incident Command Agent that runs t
 **A. OPAL Loop**
 ```mermaid
 flowchart LR
-    O[Observe<br>incident_agent.py · remote_agent.py] --> P[Plan<br>incident_planner.py]
-    P --> A[Act<br>local tools or mcp_client.py → mcp_server.py]
-    A --> L[Learn<br>incident_memory.py<br>(write_delta · write_plan)]
-    L --> T[Telemetry JSONL<br>telemetry.py]
+    O[Observe: incident_agent py AND remote_agent py] --> P[Plan: incident_planner py]
+    P --> A[Act: local tools OR mcp_client py to mcp_server py]
+    A --> L[Learn: incident_memory py writes]
+    L --> T[Telemetry JSONL: telemetry py]
 ```
 
 **B. MCP Server ↔ Client Flow**
@@ -47,45 +47,41 @@ sequenceDiagram
 **C. Local Deterministic Tool Flow**
 ```mermaid
 flowchart TD
-    CLI[cli.py] --> IA[IncidentAgent\nLocal OPAL Loop]
-    
+    CLI[cli py] --> IA[IncidentAgent Local OPAL Loop]
+
     IA --> O[Observe]
-    IA --> P[Plan\n(incident_planner.py)]
-    IA --> A[Act\nLOCAL_TOOLS]
-    IA --> L[Learn\n(incident_memory.py)]
-    
-    A --> MEM1[IncidentMemoryStore\n(reads)]
-    A --> MEM2[IncidentMemoryStore\n(writes)]
-    
-    subgraph LOCAL_TOOLS[Local Tool Handlers]
+    IA --> P[Plan incident_planner py]
+    IA --> A[Act LOCAL_TOOLS]
+    IA --> L[Learn incident_memory py]
+
+    A --> MEM1[IncidentMemoryStore reads]
+    A --> MEM2[IncidentMemoryStore writes]
+
+    subgraph LOCAL_TOOLS
         RT[retrieve_runbook]
         RD[run_diagnostic]
         CI[create_incident]
         AE[add_evidence]
         AD[append_delta]
     end
-    
+
     RT --> MEM1
     RD --> MEM1
     CI --> MEM2
     AE --> MEM2
     AD --> MEM2
 
-    IA --> TEL[TelemetryLogger\nartifacts/telemetry.jsonl]
+    IA --> TEL[TelemetryLogger artifacts telemetry jsonl]
 ```
 
 **D. Telemetry Logging Pipeline**
 ```mermaid
 flowchart LR
-    OPAL[OPAL phases: observe → plan → act → learn]
-        --> EVT[TelemetryEvent dataclass]
-
+    OPAL[OPAL phases observe plan act learn] --> EVT[TelemetryEvent]
     EVT --> LOG[TelemetryLogger]
-
-    LOG --> FILE[artifacts/telemetry.jsonl]
-    LOG --> OUT[STDOUT (pretty print)]
-
-    FILE --> REPLAY[ReplayRunner\n(replay.py)]
+    LOG --> FILE[artifacts telemetry jsonl]
+    LOG --> OUT[STDOUT pretty]
+    FILE --> REPLAY[ReplayRunner replay py]
 ```
 
 # 4. Module Documentation (File-by-File)
