@@ -1,16 +1,16 @@
-# MCP Tool Harness (Warm-Up)
+# MCP Tool Harness (Warm-Up Module)
 
-This directory implements the Tool Harness warm-up project for Week-04 of The AI Engineer program.
-It provides a minimal, self-contained MCP server and client that exercise:
+This directory implements the **Tool Harness warm-up project** for **Week-04 of *The AI Engineer*** program.  
+It provides a compact, self-contained MCP server and client designed to exercise the foundational mechanisms behind modern agent systems:
 
-- JSON schema modeling
-- Basic MCP tool capabilities
-- Deterministic OPAL loops (Observe → Plan → Act → Learn)
-- Telemetry logging
-- Replay-friendly JSONL traces
-- In-memory resource handling through `memory://` URIs
+- JSON Schema–driven tool interfaces  
+- Deterministic **OPAL loops** (Observe → Plan → Act → Learn)  
+- Fully typed telemetry instrumentation  
+- Replay-ready execution traces (JSONL)  
+- In-memory “`memory://`” resources  
+- End-to-end local server/client interaction  
 
-The warm-up is a simplified version of the architecture used in the full Incident Command Agent located in `02_incident_command_agent/`.
+This warm-up module mirrors the core architecture used later in the **full Incident Command Agent** located in `02_incident_command_agent/`, but in a simplified, didactic form.
 
 ---
 
@@ -35,78 +35,127 @@ The warm-up is a simplified version of the architecture used in the full Inciden
 
 ## Component Overview
 
-### schemas.py
+### **schemas.py**
 Defines JSON schemas for the three warm-up tools:
 
-- retrieve_runbook
-- run_diagnostic
-- summarize_incident
+- `retrieve_runbook`
+- `run_diagnostic`
+- `summarize_incident`
 
-Also defines typed resource fixtures for the following memory URIs:
+Also contains typed resource fixtures for the following `memory://` URIs:
 
-- memory://alerts/latest
-- memory://runbooks/index
-- memory://deltas/recent
+- `memory://alerts/latest`
+- `memory://runbooks/index`
+- `memory://deltas/recent`
 
----
-
-### telemetry.py
-Implements:
-
-- Correlation IDs
-- Budget object (tokens, milliseconds, cost)
-- Telemetry event dataclass
-- JSONL telemetry logger
-- Timing helper
+These schemas make the tool harness fully **MCP-compliant**, enabling deterministic input/output validation.
 
 ---
 
-### mcp_tool_harness_server.py
-Minimal MCP server implementing:
+### **telemetry.py**
+Implements core observability primitives:
 
-- initialize
-- getResource
-- callTool
+- Correlation IDs  
+- Token/time/cost **Budget** object  
+- `TelemetryEvent` dataclass  
+- High-resolution timing decorator  
+- JSONL logger compatible with downstream replay tools  
 
-Exposes three tools and logs full telemetry into JSONL files.
+Telemetry is structured and analyzable — ideal for debugging and benchmarking small agents.
 
 ---
 
-### mcp_tool_harness_client.py
-Simple orchestrator that performs one OPAL loop:
+### **mcp_tool_harness_server.py**
+A minimal MCP server implementing:
 
-1. Observe
-2. Plan
-3. Act
-4. Learn
+- **initialize**  
+- **getResource**  
+- **callTool**
 
-All events logged under `samples/client_telemetry.log`.
+Exposes the three warm-up tools and logs server-side telemetry into `samples/server_telemetry.log`.
+
+The server provides:
+
+- Declarative tool registration  
+- Typed resource retrieval  
+- Deterministic execution  
+- Fully local, dependency-free behavior  
+
+---
+
+### **mcp_tool_harness_client.py**
+A lightweight orchestrator that performs one complete **OPAL loop**:
+
+1. **Observe** → query server capabilities & resources  
+2. **Plan** → simple policy-driven planner logic  
+3. **Act** → execute MCP tools  
+4. **Learn** → retrieve deltas/resources post-execution  
+
+Client telemetry is logged into `samples/client_telemetry.log`.
+
+This file demonstrates the exact interaction pattern used by more sophisticated agents later in Week-04.
 
 ---
 
 ## Running the Warm-Up
 
-Terminal 1:
+### Terminal 1 — Start the MCP server
 
 ```
 cd 01_tool_harness
 python mcp_tool_harness_server.py
 ```
 
-Terminal 2:
+### Terminal 2 — Run the sample client
 
 ```
 python mcp_tool_harness_client.py
 ```
 
+Both logs will appear in `samples/`.
+
+---
+
+## Example Output (Client)
+
+```
+=== OPAL Summary ===
+{
+  "observations": {...},
+  "plan": [...],
+  "results": [...],
+  "learn": {...}
+}
+```
+
+Full traces are available in:
+
+- `samples/client_telemetry.log`
+- `samples/server_telemetry.log`
+
 ---
 
 ## Purpose of the Warm-Up
 
-Prepares the environment for the full Incident Command agent by establishing:
+This module prepares you for the full multi-step Incident Command Agent by establishing the foundations:
 
-- Tool schemas
-- Resource access
-- OPAL loop
-- Structured telemetry
-- Replay-ready logs
+- Tool schemas  
+- Resource access patterns  
+- Deterministic OPAL loop  
+- Structured telemetry  
+- Replay-ready logging  
+- Local server/client interplay  
+
+Once these fundamentals are mastered, we are ready to build the full agent system in:
+
+```
+02_incident_command_agent/
+```
+
+---
+
+## Version
+
+**Week-04 — Module 01: MCP Tool Harness  
+AI Engineer Program (Nov 2025 Cohort)**
+
