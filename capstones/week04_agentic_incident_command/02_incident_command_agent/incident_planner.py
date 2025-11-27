@@ -32,17 +32,27 @@ class IncidentPlanner:
         return [
             {
                 "type": "callTool",
+                "name": "retrieve_runbook",
+                "input": {"query": "CPU", "top_k": 2},
+            },
+            {
+                "type": "callTool",
+                "name": "run_diagnostic",
+                "input": {"command": "kubectl top pod", "host": "staging-api"},
+            },
+            {
+                "type": "callTool",
                 "name": "create_incident",
                 "input": {"id": "INC-001", "title": "Investigate incident", "severity": "medium"},
             },
             {
                 "type": "callTool",
                 "name": "add_evidence",
-                "input": {"id": "EV-001", "content": "Initial evidence placeholder", "source": "system"},
+                "input": {"id": "EV-001", "content": "Diagnostics and runbook retrieved", "source": "system"},
             },
             {
                 "type": "callTool",
-                "name": "append_delta",
-                "input": {"action": "noop", "details": {"note": "Plan executed"}},
+                "name": "summarize_incident",
+                "input": {"alert_id": "ALRT-0001", "evidence": ["run_diagnostic", "retrieve_runbook"]},
             },
         ]

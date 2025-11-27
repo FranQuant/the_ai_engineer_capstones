@@ -45,6 +45,34 @@ def get_tool_schemas() -> Dict[str, Dict[str, object]]:
             },
             "required": ["action"],
         },
+        "retrieve_runbook": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "top_k": {"type": "integer", "minimum": 1, "maximum": 5},
+            },
+            "required": ["query"],
+        },
+        "run_diagnostic": {
+            "type": "object",
+            "properties": {
+                "command": {"type": "string"},
+                "host": {"type": "string"},
+            },
+            "required": ["command", "host"],
+        },
+        "summarize_incident": {
+            "type": "object",
+            "properties": {
+                "alert_id": {"type": "string"},
+                "evidence": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "default": [],
+                },
+            },
+            "required": ["alert_id"],
+        },
     }
 
 
@@ -82,6 +110,25 @@ def get_resource_schemas() -> Dict[str, Dict[str, object]]:
                 "plan": {"type": "array"},
             },
             "required": ["plan"],
+        },
+        "memory://alerts/latest": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string"},
+                "service": {"type": "string"},
+                "symptom": {"type": "string"},
+                "severity": {"type": "string"},
+            },
+            "required": ["id", "service", "symptom", "severity"],
+        },
+        "memory://runbooks/index": {
+            "type": "array",
+            "items": {"type": "object"},
+        },
+        "memory://memory/deltas": {
+            "type": "object",
+            "properties": {"items": {"type": "array"}},
+            "required": ["items"],
         },
     }
 

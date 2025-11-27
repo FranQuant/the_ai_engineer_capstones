@@ -26,12 +26,27 @@ class IncidentMemoryStore:
             "evidence": {},
             "deltas": [],
             "plans": {},
+            "alerts": {"latest": {
+                "id": "ALRT-0001",
+                "service": "staging-api",
+                "symptom": "CPU spike on node-3",
+                "severity": "high",
+                "detected_at": "2025-11-23T09:00:00Z",
+            }},
+            "runbooks": {
+                "index": [
+                    {"id": "rb-101", "title": "High CPU playbook", "service": "staging-api"},
+                    {"id": "rb-202", "title": "Crashloop restart", "service": "staging-api"},
+                ]
+            },
         }
         if initial_data:
             self._data["incidents"].update(initial_data.get("incidents", {}))
             self._data["evidence"].update(initial_data.get("evidence", {}))
             self._data["deltas"].extend(initial_data.get("deltas", []))
             self._data["plans"].update(initial_data.get("plans", {}))
+            self._data["alerts"].update(initial_data.get("alerts", {}))
+            self._data["runbooks"].update(initial_data.get("runbooks", {}))
 
     # Compatibility helpers -------------------------------------------------
     def read(self, uri: str, cursor: Optional[str] = None) -> Dict[str, Any]:
@@ -58,6 +73,9 @@ class IncidentMemoryStore:
             {"uri": "memory://evidence/{id}", "type": "evidence"},
             {"uri": "memory://deltas/recent", "type": "delta_list"},
             {"uri": "memory://plans/current", "type": "plan"},
+            {"uri": "memory://alerts/latest", "type": "alert"},
+            {"uri": "memory://runbooks/index", "type": "runbook_list"},
+            {"uri": "memory://memory/deltas", "type": "delta_list"},
         ]
 
     def get_resource(self, uri: str, cursor: Optional[str] = None) -> Dict[str, Any]:
@@ -73,6 +91,12 @@ class IncidentMemoryStore:
             return {"items": list(self._data["deltas"])}
         if uri == "memory://plans/current":
             return {"plan": self._data["plans"].get("current", [])}
+        if uri == "memory://alerts/latest":
+            return self._data["alerts"].get("latest", {})
+        if uri == "memory://runbooks/index":
+            return list(self._data["runbooks"].get("index", []))
+        if uri == "memory://memory/deltas":
+            return {"items": list(self._data["deltas"])}
         raise ValueError(f"Unknown resource URI: {uri}")
 
     def write_delta(self, delta: Dict[str, Any]) -> Dict[str, Any]:

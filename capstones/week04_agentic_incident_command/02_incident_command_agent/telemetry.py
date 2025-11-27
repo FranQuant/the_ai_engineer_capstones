@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
@@ -60,20 +60,8 @@ class TelemetryLogger:
 
     def log(self, event: TelemetryEvent) -> None:
         """Record telemetry event."""
-        record = {
-            "correlation_id": event.correlation_id,
-            "loop_id": event.loop_id,
-            "phase": event.phase,
-            "method": event.method,
-            "status": event.status,
-            "latency_ms": event.latency_ms,
-            "budget": {
-                "tokens": event.budget.tokens,
-                "ms": event.budget.ms,
-                "dollars": event.budget.dollars,
-            },
-            "payload": event.payload,
-        }
+        record = asdict(event)
+        record["timestamp"] = time.time()
         line = json.dumps(record)
         print(line)
         self.sink.parent.mkdir(parents=True, exist_ok=True)
