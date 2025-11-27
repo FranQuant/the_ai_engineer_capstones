@@ -47,26 +47,26 @@ sequenceDiagram
 **C. Local Deterministic Tool Flow**
 ```mermaid
 flowchart TD
-    CLI[cli.py] --> IA[IncidentAgent<br>Local OPAL Loop]
+    CLI["cli.py"] --> IA["IncidentAgent\nLocal OPAL Loop"]
 
     subgraph OPAL_STAGES
-        IA --> OBS[Observe]
-        IA --> PLN[Plan<br>incident_planner.py]
-        IA --> ACT[Act<br>LOCAL_TOOLS]
-        IA --> LRN[Learn<br>incident_memory.py]
+        IA --> OBS["Observe"]
+        IA --> PLN["Plan\nincident_planner.py"]
+        IA --> ACT["Act\nLOCAL_TOOLS"]
+        IA --> LRN["Learn\nincident_memory.py"]
     end
 
     %% Memory interactions
-    ACT --> MEMR[MemoryStore<br>(reads)]
-    ACT --> MEMW[MemoryStore<br>(writes)]
+    ACT --> MEMR["MemoryStore\n(reads)"]
+    ACT --> MEMW["MemoryStore\n(writes)"]
 
     %% Local Tool Handlers
-    subgraph LOCAL_TOOLS[Local Tools]
-        RT[retrieve_runbook]
-        RD[run_diagnostic]
-        CI[create_incident]
-        AE[add_evidence]
-        AD[append_delta]
+    subgraph LOCAL_TOOLS["Local Tools"]
+        RT["retrieve_runbook"]
+        RD["run_diagnostic"]
+        CI["create_incident"]
+        AE["add_evidence"]
+        AD["append_delta"]
     end
 
     %% Tool → memory mapping
@@ -76,21 +76,17 @@ flowchart TD
     AE --> MEMW
     AD --> MEMW
 
-    IA --> TELE[TelemetryLogger<br>artifacts/telemetry.jsonl]
+    IA --> TELE["TelemetryLogger\nartifacts/telemetry.jsonl"]
 ```
 
 **D. Telemetry Logging Pipeline**
 ```mermaid
 flowchart LR
-    OPAL[OPAL phases<br>observe → plan → act → learn]
-        --> EVT[TelemetryEvent]
-
-    EVT --> LOG[TelemetryLogger]
-
-    LOG --> FILE[artifacts/telemetry.jsonl]
-    LOG --> OUT[STDOUT<br>pretty print]
-
-    FILE --> REPLAY[ReplayRunner<br>(replay.py)]
+    OPAL["OPAL phases:\nobserve → plan → act → learn"] --> EVT["TelemetryEvent"]
+    EVT --> LOG["TelemetryLogger"]
+    LOG --> FILE["artifacts/telemetry.jsonl"]
+    LOG --> OUT["STDOUT\n(pretty print)"]
+    FILE --> REPLAY["ReplayRunner\n(replay.py)"]
 ```
 
 # 4. Module Documentation (File-by-File)
