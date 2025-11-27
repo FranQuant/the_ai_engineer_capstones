@@ -47,17 +47,21 @@ sequenceDiagram
 **C. Local Deterministic Tool Flow**
 ```mermaid
 flowchart TD
-    CLI[cli py] --> IA[IncidentAgent Local OPAL Loop]
+    CLI[cli.py] --> IA[IncidentAgent<br>Local OPAL Loop]
 
-    IA --> O[Observe]
-    IA --> P[Plan incident_planner py]
-    IA --> A[Act LOCAL_TOOLS]
-    IA --> L[Learn incident_memory py]
+    subgraph OPAL_STAGES
+        IA --> OBS[Observe]
+        IA --> PLN[Plan<br>incident_planner.py]
+        IA --> ACT[Act<br>LOCAL_TOOLS]
+        IA --> LRN[Learn<br>incident_memory.py]
+    end
 
-    A --> MEM1[IncidentMemoryStore reads]
-    A --> MEM2[IncidentMemoryStore writes]
+    %% Memory interactions
+    ACT --> MEMR[MemoryStore<br>(reads)]
+    ACT --> MEMW[MemoryStore<br>(writes)]
 
-    subgraph LOCAL_TOOLS
+    %% Local Tool Handlers
+    subgraph LOCAL_TOOLS[Local Tools]
         RT[retrieve_runbook]
         RD[run_diagnostic]
         CI[create_incident]
@@ -65,23 +69,28 @@ flowchart TD
         AD[append_delta]
     end
 
-    RT --> MEM1
-    RD --> MEM1
-    CI --> MEM2
-    AE --> MEM2
-    AD --> MEM2
+    %% Tool → memory mapping
+    RT --> MEMR
+    RD --> MEMR
+    CI --> MEMW
+    AE --> MEMW
+    AD --> MEMW
 
-    IA --> TEL[TelemetryLogger artifacts telemetry jsonl]
+    IA --> TELE[TelemetryLogger<br>artifacts/telemetry.jsonl]
 ```
 
 **D. Telemetry Logging Pipeline**
 ```mermaid
 flowchart LR
-    OPAL[OPAL phases observe plan act learn] --> EVT[TelemetryEvent]
+    OPAL[OPAL phases<br>observe → plan → act → learn]
+        --> EVT[TelemetryEvent]
+
     EVT --> LOG[TelemetryLogger]
-    LOG --> FILE[artifacts telemetry jsonl]
-    LOG --> OUT[STDOUT pretty]
-    FILE --> REPLAY[ReplayRunner replay py]
+
+    LOG --> FILE[artifacts/telemetry.jsonl]
+    LOG --> OUT[STDOUT<br>pretty print]
+
+    FILE --> REPLAY[ReplayRunner<br>(replay.py)]
 ```
 
 # 4. Module Documentation (File-by-File)
