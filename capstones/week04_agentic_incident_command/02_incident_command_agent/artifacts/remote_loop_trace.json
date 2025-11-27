@@ -1,0 +1,190 @@
+{
+  "observations": {
+    "capabilities": {
+      "sampling": {
+        "available": false
+      }
+    },
+    "tools": [
+      {
+        "name": "create_incident",
+        "description": "Stub tool for create incident",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "title": {"type": "string"},
+            "severity": {"type": "string"}
+          },
+          "required": ["id", "title"]
+        }
+      },
+      {
+        "name": "add_evidence",
+        "description": "Stub tool for add evidence",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "content": {"type": "string"},
+            "source": {"type": "string"}
+          },
+          "required": ["content"]
+        }
+      },
+      {
+        "name": "append_delta",
+        "description": "Stub tool for append delta",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "action": {"type": "string"},
+            "details": {"type": "object"}
+          },
+          "required": ["action"]
+        }
+      }
+    ],
+    "resources": [
+      {
+        "uri": "memory://incidents/{id}",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "title": {"type": "string"},
+            "severity": {"type": "string"}
+          },
+          "required": ["id"]
+        },
+        "description": "Resource for memory://incidents/{id}"
+      },
+      {
+        "uri": "memory://evidence/{id}",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "content": {"type": "string"},
+            "source": {"type": "string"}
+          },
+          "required": ["id", "content"]
+        },
+        "description": "Resource for memory://evidence/{id}"
+      },
+      {
+        "uri": "memory://deltas/recent",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "items": {"type": "array"}
+          },
+          "required": ["items"]
+        },
+        "description": "Resource for memory://deltas/recent"
+      },
+      {
+        "uri": "memory://plans/current",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "plan": {"type": "array"}
+          },
+          "required": ["plan"]
+        },
+        "description": "Resource for memory://plans/current"
+      }
+    ]
+  },
+  "plan": [
+    {
+      "type": "callTool",
+      "name": "create_incident",
+      "input": {
+        "id": "INC-001",
+        "title": "Investigate incident",
+        "severity": "medium"
+      }
+    },
+    {
+      "type": "callTool",
+      "name": "add_evidence",
+      "input": {
+        "id": "EV-001",
+        "content": "Initial evidence placeholder",
+        "source": "system"
+      }
+    },
+    {
+      "type": "callTool",
+      "name": "append_delta",
+      "input": {
+        "action": "noop",
+        "details": {
+          "note": "Plan executed"
+        }
+      }
+    }
+  ],
+  "results": [
+    {
+      "step": {
+        "type": "callTool",
+        "name": "create_incident",
+        "input": {
+          "id": "INC-001",
+          "title": "Investigate incident",
+          "severity": "medium"
+        }
+      },
+      "result": {
+        "id": "INC-001",
+        "title": "Investigate incident",
+        "severity": "medium"
+      }
+    },
+    {
+      "step": {
+        "type": "callTool",
+        "name": "add_evidence",
+        "input": {
+          "id": "EV-001",
+          "content": "Initial evidence placeholder",
+          "source": "system"
+        }
+      },
+      "result": {
+        "id": "EV-001",
+        "content": "Initial evidence placeholder",
+        "source": "system"
+      }
+    },
+    {
+      "step": {
+        "type": "callTool",
+        "name": "append_delta",
+        "input": {
+          "action": "noop",
+          "details": {"note": "Plan executed"}
+        }
+      },
+      "result": {
+        "action": "noop",
+        "details": {"note": "Plan executed"}
+      }
+    }
+  ],
+  "learn": {
+    "deltas": {
+      "items": [
+        {
+          "action": "noop",
+          "details": {"note": "Plan executed"}
+        }
+      ]
+    },
+    "plan": {
+      "plan": []
+    }
+  }
+}
