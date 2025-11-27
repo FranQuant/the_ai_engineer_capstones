@@ -21,10 +21,10 @@ The Week 04 capstone delivers a deterministic Incident Command Agent that runs t
 **A. OPAL Loop**
 ```mermaid
 flowchart LR
-    O[Observe\nincident_agent.py / remote_agent.py] --> P[Plan\nincident_planner.py]
-    P --> A[Act\nlocal tools or mcp_client.py -> mcp_server.py]
-    A --> L[Learn\nincident_memory.py\n(write_delta / write_plan)]
-    L -->|telemetry.py| T[Telemetry JSONL]
+    O[Observe<br>incident_agent.py · remote_agent.py] --> P[Plan<br>incident_planner.py]
+    P --> A[Act<br>local tools or mcp_client.py → mcp_server.py]
+    A --> L[Learn<br>incident_memory.py<br>(write_delta · write_plan)]
+    L --> T[Telemetry JSONL<br>telemetry.py]
 ```
 
 **B. MCP Server ↔ Client Flow**
@@ -47,15 +47,15 @@ sequenceDiagram
 **C. Local Deterministic Tool Flow**
 ```mermaid
 flowchart TD
-    CLI[cli.py] --> IA[IncidentAgent<br>Local OPAL Loop]
+    CLI[cli.py] --> IA[IncidentAgent\nLocal OPAL Loop]
     
     IA --> O[Observe]
-    IA --> P[Plan<br>(incident_planner.py)]
-    IA --> A[Act<br>LOCAL_TOOLS]
-    IA --> L[Learn<br>(incident_memory.py)]
+    IA --> P[Plan\n(incident_planner.py)]
+    IA --> A[Act\nLOCAL_TOOLS]
+    IA --> L[Learn\n(incident_memory.py)]
     
-    A --> MEM1[IncidentMemoryStore<br>(reads)]
-    A --> MEM2[IncidentMemoryStore<br>(writes)]
+    A --> MEM1[IncidentMemoryStore\n(reads)]
+    A --> MEM2[IncidentMemoryStore\n(writes)]
     
     subgraph LOCAL_TOOLS[Local Tool Handlers]
         RT[retrieve_runbook]
@@ -71,105 +71,124 @@ flowchart TD
     AE --> MEM2
     AD --> MEM2
 
-    IA --> TEL[TelemetryLogger<br>artifacts/telemetry.jsonl]
+    IA --> TEL[TelemetryLogger\nartifacts/telemetry.jsonl]
 ```
 
 **D. Telemetry Logging Pipeline**
 ```mermaid
 flowchart LR
-    OPAL[OPAL phases\nobserve ▸ plan ▸ act ▸ learn]
-        --> EVT[TelemetryEvent\ndataclass]
+    OPAL[OPAL phases: observe → plan → act → learn]
+        --> EVT[TelemetryEvent dataclass]
 
     EVT --> LOG[TelemetryLogger]
 
     LOG --> FILE[artifacts/telemetry.jsonl]
-    LOG --> OUT[STDOUT\n(pretty print)]
+    LOG --> OUT[STDOUT (pretty print)]
 
     FILE --> REPLAY[ReplayRunner\n(replay.py)]
 ```
 
-## 4. Module Documentation (File-by-File)
+# 4. Module Documentation (File-by-File)
+
+## Overview Table
+
+| Module | Role | Key Responsibilities | Telemetry |
+|-------|------|----------------------|-----------|
+| `incident_agent.py` | Local OPAL loop executor | Runs observe → plan → act → learn locally; pure deterministic tools; guardrails; writes deltas/plans | Full OPAL phase events |
+| `remote_agent.py` | Remote OPAL loop executor | Delegates Act/Learn to MCP via WebSockets; same guardrails; fetches memory resources | OPAL + rpc_send/rpc_recv |
+| `mcp_server.py` | JSON-RPC MCP server | initialize, getResource, callTool; deterministic envelopes; schema validation | Request/response logging |
+| `mcp_client.py` | Telemetry-enabled MCP client | RPC wrapper with telemetry; manages Budget and session lifecycle | rpc_send + rpc_recv |
+| `incident_planner.py` | Deterministic planner | Fixed 5-step plan; predictable for testing/replay | plan_start/end |
+| `incident_memory.py` | Memory store | Backing store for all memory:// URIs; read/write deltas, plans, evidence | learn_start/end |
+| `incident_schemas.py` | Tool/resource schemas | JSON schemas, descriptors, validation helpers | (indirect) via server |
+| `telemetry.py` | Telemetry data model | TelemetryEvent, Budget, RunContext, TelemetryLogger | Writes JSONL events |
+| `replay.py` | Telemetry replay engine | Event loader, normalizer, ordered playback | Reads JSONL sink |
+| `cli.py` | Local runner / Replay CLI | Runs OPAL loop or replay mode | Mirrors agent telemetry |
+| `demo_remote.py` | Remote agent demonstration | Runs remote OPAL loop via MCP server | Shared telemetry sink |
+
+---
+
+## Detailed Notes
+
 ### incident_agent.py
 - Executes the local deterministic OPAL loop with in‑process tool handlers (no MCP dependency).
 - Defines pure, deterministic local tools: `retrieve_runbook`, `run_diagnostic`, `summarize_incident`, `create_incident`, `add_evidence`, `append_delta`.
-- Enforces guardrails: `max_steps=5`, `max_latency_ms=150`, `max_retries=2`, tracking cumulative latency and retry counts inside `act()`.
+- Guardrails: `max_steps=5`, `max_latency_ms=150`, `max_retries=2`.
 - Emits structured telemetry for every phase: `observe_start/end`, `plan_start/end`, `plan_guardrail`, `act_start/guardrail/end`, `learn_start/end`.
-- Uses `RunContext` + `Budget(tokens=2000, ms=150, dollars=0.0)` for each OPAL loop.
-- `run_loop()` performs batching of callTool steps (`callTool_batch`) and writes deltas + plan via `write_plan()` during the Learn phase.
+- Uses `RunContext` + `Budget(tokens=2000, ms=150, dollars=0.0)`.
+- `run_loop()` batches callTool steps and writes deltas/plans in Learn.
 
 ### remote_agent.py
-- Runs the OPAL loop but delegates all tool execution and resource access to `mcp_client.py` over WebSockets.
-- Planning is fully local; only the Act and Learn phases depend on MCP.
-- Applies identical guardrails as the local agent: cumulative latency, max steps, max retries.
-- Adds telemetry for MCP failures (`status="error"`) while preserving deterministic OPAL flow.
-- `learn()` retrieves `memory://deltas/recent` and `memory://plans/current` via MCP resource reads.
+- Runs OPAL loop but delegates Act/Learn via WebSockets using `mcp_client.py`.
+- Planning stays local.
+- Same guardrails as local agent.
+- Produces telemetry on MPC failures with `status="error"`.
+- Uses MCP reads to fetch: `memory://deltas/recent`, `memory://plans/current`.
 
 ### mcp_server.py
 - JSON‑RPC WebSocket server exposing: `initialize`, `getResource`, `callTool`.
-- Serves deterministic envelopes for all tools with shape:
+- Deterministic envelopes:
   ```json
   {"status": "ok", "data": {...}, "metrics": {"latency_ms": X}}
   ```
-- Runs at default endpoint: `ws://127.0.0.1:8765/mcp`.
-- Advertises all resources:  
-  `memory://incidents/{id}`, `memory://evidence/{id}`,  
-  `memory://deltas/recent`, `memory://plans/current`,  
-  `memory://alerts/latest`, `memory://runbooks/index`,  
+- Default endpoint: `ws://127.0.0.1:8765/mcp`.
+- Advertises resources:  
+  `memory://incidents/{id}`, `memory://evidence/{id}`, `memory://deltas/recent`,  
+  `memory://plans/current`, `memory://alerts/latest`, `memory://runbooks/index`,  
   `memory://memory/deltas`.
-- Validates tool inputs using `incident_schemas.get_tool_schemas()` and returns JSON‑RPC error envelopes for invalid/unknown tools.
-- Telemetry logs every incoming request, outgoing response, correlation ID, loop ID, phase, and latency.
+- Validates tool inputs using schemas.
+- Telemetry logs request/response pairs with correlation ID, loop ID, latency.
 
 ### mcp_client.py
-- Telemetry‑aware JSON‑RPC WebSocket client.
-- Wraps all remote calls (`call_tool()`, `get_resource()`, `initialize()`) in telemetry events: `"rpc_send"` and `"rpc_recv"`.
-- Maintains its own `Budget` instance and logs per‑request metadata when a `RunContext` is provided.
-- Manages lifecycle through `connect()` / `close()`.
+- Telemetry‑aware JSON‑RPC client.
+- Wraps all remote calls (`initialize`, `call_tool()`, `get_resource()`) in:
+  - `rpc_send`
+  - `rpc_recv`
+- Stores `Budget` per client.
+- Lifecycle: `connect()` → calls → `close()`.
 
 ### incident_planner.py
-- Deterministic planner stub producing a fixed sequence of **five** `callTool` steps:
+- Deterministic planner (always same 5 steps):
   1. retrieve_runbook  
   2. run_diagnostic  
   3. create_incident  
   4. add_evidence  
   5. summarize_incident
-- Fully predictable for unit testing and replay mode.
-- Ignores observations and budget intentionally for pedagogical clarity.
+- Predictable for testing and replay.
 
 ### incident_memory.py
-- Backing store for all `memory://` URIs used by both the local and remote agents.
-- Seeds alerts, runbooks, incidents, evidence, and delta lists.
-- Core methods:  
+- Backing store for all `memory://` URIs.
+- Seeds alerts, runbooks, incidents, evidence, deltas.
+- Core methods:
   `write_delta()`, `append_delta()`, `write_plan()`,  
   `write_evidence()`, `update_incident()`,  
   `get_resource()`, `list_resources()`.
-- `get_resource()` returns structured typed payloads (incident, evidence, delta_list, plan, alert).
-- Supports both local direct access and remote MCP resource resolution.
+- Supports both local and remote (via MCP).
 
 ### incident_schemas.py
-- Holds JSON schemas for all tools and resources.
-- Used by the MCP server to validate tool arguments and advertise descriptors in `initialize()`.
-- Provides helpers: `tool_descriptions()` and `resource_descriptions()`.
+- JSON schemas for all tools/resources.
+- MCP server uses these for validation and initialize() descriptors.
+- Helpers: `tool_descriptions()`, `resource_descriptions()`.
 
 ### telemetry.py
 - Contains `TelemetryEvent`, `Budget`, `RunContext`.
-- `TelemetryLogger` prints events and appends JSONL entries to the configured sink (`artifacts/telemetry.jsonl`).
-- `timestamp` is injected at write-time; replay preserves temporal ordering using file position when timestamps are missing.
-- Includes `timed()` decorator-like helper for latency measurement.
+- TelemetryLogger writes JSONL → `artifacts/telemetry.jsonl`.
+- Timestamps injected at write time.
+- Includes measurement helper `timed()`.
 
 ### replay.py
-- `load_events()` reads JSONL telemetry and normalizes missing timestamps.
-- `ReplayRunner.replay()` prints numbered events (`[001]`, `[002]`, …) with phase, method, latency, and selective payload fields.
-- Includes `simulate_tool_envelope()` for deterministic simulation scenarios.
+- `load_events()` loads JSONL and normalizes timestamps.
+- `ReplayRunner.replay()` prints events `[001]`, `[002]`, … with metadata.
+- Includes `simulate_tool_envelope()`.
 
 ### cli.py
-- Main entrypoint for running the **local deterministic agent** or **replay mode**.
-- Default: executes local OPAL loop.  
-  `--replay <path>`: streams JSONL telemetry through `ReplayRunner`.
-- Remote execution is intentionally implemented separately (see `demo_remote.py`).
+- Runs local OPAL loop.
+- `--replay <path>` streams JSONL telemetry using ReplayRunner.
+- Remote execution lives in `demo_remote.py`.
 
 ### demo_remote.py
-- Connects to the MCP server, runs a full remote OPAL loop, prints a structured summary.
-- Shares telemetry sink (`artifacts/telemetry.jsonl`) with the server, enabling correlated traces between request/response events.
+- Connects to MCP server, runs remote OPAL loop.
+- Shares telemetry sink with server for correlated traces.
 
 ## 5. Usage Instructions (With Real Commands)
 ### A. Local Deterministic Agent
