@@ -132,17 +132,20 @@ For GD, constant-step SGD, and diminishing-step SGD:
 
 - **Final gap**
 
+
   $$
   |f(x_T) - f(x^\star)|
   $$
 
 - **Best gap**
 
+
   $$
   \min_{t \le T} |f(x_t) - f(x^\star)|
   $$
 
 - **Steps-to-tolerance**
+
 
   $$
   |f(x_t) - f(x^\star)| < 10^{-4}
