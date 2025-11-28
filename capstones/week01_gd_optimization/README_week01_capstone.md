@@ -132,24 +132,17 @@ For GD, constant-step SGD, and diminishing-step SGD:
 
 - **Final gap**
 
+  $|f(x_T) - f(x^\star)|$
 
-  \[
-  |f(x_T) - f(x^\star)|
-  \]
 
 - **Best gap**
 
 
-  \[
-  \min_{t \le T} |f(x_t) - f(x^\star)|
-  \]
+  $\min_{t \le T} |f(x_t) - f(x^\star)|$
 
 - **Steps-to-tolerance**
 
-
-  \[
-  |f(x_t) - f(x^\star)| < 10^{-4}
-  \]
+  $|f(x_t) - f(x^\star)| < 10^{-4}$
 
 All figures include labels, titles, and captions.
 
@@ -161,9 +154,7 @@ All results are fully reproducible:
 
 - Global NumPy seed
   
-  \[
-  \text{SEED} = 123
-  \]
+  $\text{SEED} = 123$
 
 - Centralized hyperparameters  
 - Programmatically generated data  
