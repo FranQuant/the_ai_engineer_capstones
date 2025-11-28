@@ -130,17 +130,20 @@ Shows the basin boundary at $x=-1$ and divergence when $x_0 < -1$.
 
 For GD, constant-step SGD, and diminishing-step SGD:
 
-- **Final gap**  
+- **Final gap**
+
   $$
   |f(x_T) - f(x^\star)|
   $$
 
-- **Best gap**  
+- **Best gap**
+
   $$
   \min_{t \le T} |f(x_t) - f(x^\star)|
   $$
 
-- **Steps-to-tolerance**  
+- **Steps-to-tolerance**
+
   $$
   |f(x_t) - f(x^\star)| < 10^{-4}
   $$
@@ -153,10 +156,12 @@ All figures include labels, titles, and captions.
 
 All results are fully reproducible:
 
-- Global NumPy seed  
+- Global NumPy seed
+  
   $$
   \text{SEED} = 123
   $$
+
 - Centralized hyperparameters  
 - Programmatically generated data  
 - No external datasets  
