@@ -1,17 +1,17 @@
 # Week 1 Capstone — Gradient Descent Optimization
 
 This folder contains the Week-1 Gradient Descent Optimization capstone for *The AI Engineer* program.  
-The objective of this assignment is to implement and analyze basic gradient-based optimization methods on simple one-dimensional functions, following the requirements of the Week-1 handout and coaching guide.
+The objective is to implement and analyze basic gradient-based optimization methods on simple one-dimensional functions, following the specifications in the Week-1 handout and coaching guide.
 
 ---
 
 ## Overview
 
-This capstone studies two instructional objectives:
+This capstone studies two core instructional objectives:
 
 ### 1. **Quadratic baseline**
 
-A convex function used to study stability and step-size effects:
+A convex objective used to analyze stability and step-size effects:
 
 $$
 q(x) = \tfrac{1}{2} x^2,
@@ -21,7 +21,7 @@ $$
 
 ### 2. **Simple cubic loss**
 
-A non-convex function used to illustrate basins of attraction, divergence, and GD/SGD behavior:
+A non-convex objective used to illustrate basins of attraction, divergence, and differences between GD and SGD:
 
 $$
 f(x) = x^3 - 3x,
@@ -29,15 +29,12 @@ f(x) = x^3 - 3x,
 f'(x) = 3x^2 - 3.
 $$
 
-It has two stationary points:
-- $x = -1$: local maximum (unstable),
-- $x = +1$: local minimum (stable for $0 < \eta < \tfrac{1}{3}$).
+The cubic has two stationary points:
 
-This structure allows us to examine:
+- $x = -1$ — local maximum (unstable)  
+- $x = +1$ — local minimum (stable for $0 < \eta < \tfrac{1}{3}$)
 
-- Convergence vs divergence  
-- Sensitivity to initialization  
-- The effect of noise in stochastic gradients  
+This non-convex structure makes it ideal for analyzing convergence, divergence, sensitivity to initialization, and stochastic behavior.
 
 ---
 
@@ -45,21 +42,31 @@ This structure allows us to examine:
 
 ### 1. **Deterministic Gradient Descent (GD)**
 
-Exact gradient updates of the form:
+GD performs the update:
 
 $$
 x_{t+1} = x_t - \eta \nabla f(x_t).
 $$
 
-- **Quadratic step-size sweep**:
-  $$
-  \eta \in \{0.01,\; 0.05,\; 0.10,\; 0.20\}.
-  $$
+#### **Quadratic step-size sweep (required grid)**
 
-- **Cubic fixed step size**:
-  $$
-  \eta_{\text{cubic}} = 0.05.
-  $$
+The notebook uses the step-size set required by Week-1:
+
+$$
+\eta \in \{0.05,\; 0.10,\; 0.15,\; 0.20\}.
+$$
+
+This sweep highlights stability boundaries, convergence speed, and divergence at larger $\eta$.
+
+#### **Cubic fixed step size**
+
+A single learning rate is used:
+
+$$
+\eta_{\text{cubic}} = 0.05.
+$$
+
+This ensures stability around the attracting minimum at $x^\star = 1$.
 
 ---
 
@@ -73,7 +80,7 @@ g_t = f'(x_t) + \varepsilon_t,
 \varepsilon_t \sim \mathcal{N}(0, \sigma^2).
 $$
 
-Two schedules are implemented:
+Two learning-rate schedules are implemented:
 
 #### **Constant step size**
 
@@ -83,7 +90,11 @@ x_{t+1} = x_t - \eta\, g_t,
 \eta = 0.05.
 $$
 
-This converges only to a noise-controlled neighborhood of the minimizer.
+This schedule does **not** converge to the minimizer but instead stabilizes within a noise-controlled neighborhood whose radius scales like:
+
+$$
+\mathcal{O}\!\left(\sqrt{\eta\,\sigma^2}\right).
+$$
 
 #### **Diminishing step size**
 
@@ -93,83 +104,85 @@ $$
 \eta_0 = 0.05,\quad k = 0.01.
 $$
 
-This gradually reduces noise and produces tighter convergence.
+Because $\eta_t \to 0$, the noise contribution contracts over time, producing tighter convergence than constant-step SGD.
 
 ---
 
 ## Experiments and Plots
 
-The notebook includes:
+The notebook includes four main experimental blocks:
 
-### **1. Quadratic GD step-size sweep**
+### 1. **Quadratic GD step-size sweep**
 
-Comparison of convergence rates for different values of $\eta$.
+Comparison of convergence speed and stability for  
+$\eta \in \{0.05, 0.10, 0.15, 0.20\}$.
 
-### **2. Cubic GD from multiple initializations**
+### 2. **Cubic GD from multiple initializations**
 
-Illustrates the basin boundary at $x=-1$ and divergence when $x_0<-1$.
+Shows the basin boundary at $x=-1$ and divergence when $x_0 < -1$.
 
-### **3. SGD trajectories**
+### 3. **SGD trajectories**
 
-- Constant step-size SGD wandering around $x^\star = 1$  
-- Diminishing step-size SGD contracting toward the minimizer  
+- Constant-step SGD fluctuating around $x^\star = 1$  
+- Diminishing-step SGD contracting toward the minimum  
 
-### **4. Convergence metrics on the cubic**
+### 4. **Convergence metrics (cubic)**
 
-For GD, SGD-constant, and SGD-diminishing:
+For GD, constant-step SGD, and diminishing-step SGD:
 
-- **Final gap**
+- **Final gap**  
   $$
-  |f(x_T) - f(x^\star)|.
-  $$
-
-- **Best gap**
-  $$
-  \min_{t \le T} |f(x_t) - f(x^\star)|.
+  |f(x_T) - f(x^\star)|
   $$
 
-- **Steps-to-tolerance**
+- **Best gap**  
   $$
-  |f(x_t) - f(x^\star)| < 10^{-4}.
+  \min_{t \le T} |f(x_t) - f(x^\star)|
   $$
 
-All plots include titles, axis labels, and captions.
+- **Steps-to-tolerance**  
+  $$
+  |f(x_t) - f(x^\star)| < 10^{-4}
+  $$
+
+All figures include labels, titles, and captions.
 
 ---
 
 ## Reproducibility
 
-All experiments use:
+All results are fully reproducible:
 
-- A single global NumPy seed  
+- Global NumPy seed  
   $$
   \text{SEED} = 123
   $$
 - Centralized hyperparameters  
-- Programmatically generated data (no external files)  
-- Execution time under two minutes  
-
-The notebook is fully Colab-ready and includes an “Open in Colab” badge.
+- Programmatically generated data  
+- No external datasets  
+- Runtime well under two minutes  
+- Uses only **NumPy** and **Matplotlib**
 
 ---
 
 ## File Structure
 
+```text
 week01_gd_optimization/
 │
 ├── gd_capstone.ipynb # Final capstone notebook
 └── README_week01_capstone.md # This document
-
+```
 
 ---
 
 ## How to Run
 
-Runs top-to-bottom without modification on:
+Runs top-to-bottom on:
 
-- **Google Colab**  
-- **Local Jupyter Notebook**  
-- **GitHub Codespaces**
+- Google Colab  
+- Local Jupyter Notebook  
+- GitHub Codespaces  
 
 ### Open in Google Colab
 
@@ -183,17 +196,16 @@ Dependencies: **NumPy** and **Matplotlib** only.
 
 ## Deliverables
 
-This folder provides the required artifacts for the Week-1 capstone:
+This folder provides the complete Week-1 capstone implementation:
 
-- GD and SGD implementations  
-- Required plots and convergence metrics  
-- Reproducible, Colab-ready notebook  
-- No external data dependencies  
+- Deterministic GD and Stochastic GD  
+- Quadratic step-size sweep (using the required grid)  
+- Cubic GD basin analysis  
+- Constant vs diminishing-step SGD  
+- Convergence metrics (final gap, best gap, steps-to-tolerance)  
+- Fully reproducible, Colab-ready notebook  
 
-This submission aligns with the expectations described in:
+This submission aligns with:
 
 - **Gradient-Based Optimization Case Study**  
-- **Week-1 Coaching Guide**  
-
-
-
+- **Week-1 Coaching Guide**
