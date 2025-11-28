@@ -78,5 +78,3 @@ The notebook runs top-to-bottom on:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
 https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone.ipynb
 )
-
-Dependencies: **NumPy** and **Matplotlib** only.
