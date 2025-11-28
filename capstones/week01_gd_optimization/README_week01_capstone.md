@@ -5,7 +5,8 @@
 <h1>Week 1 Capstone — Gradient Descent Optimization</h1>
 
 This folder contains the Week-1 capstone for *The AI Engineer* program.  
-The goal is to implement and visualize basic gradient-based optimization methods on simple 1-D functions.
+The goal is to implement and visualize basic gradient-based optimization  
+methods on simple 1-D functions.
 
 </td>
 
@@ -17,19 +18,21 @@ The goal is to implement and visualize basic gradient-based optimization methods
 
 ## Overview
 
-The notebook explores how Gradient Descent (GD) and Stochastic Gradient Descent (SGD) behave on:
+The notebook explores how Gradient Descent (GD) and Stochastic Gradient Descent (SGD)
+behave on two instructional objectives:
 
-1. **A quadratic baseline**
-   - Simple convex objective  
-   - Used to study step-size stability  
+1. **Quadratic baseline**
+   - Convex, smooth objective  
+   - Used to study stability and step-size effects  
    - Includes the required learning-rate sweep
 
-2. **A cubic non-convex function**
+2. **Cubic non-convex function**
    - Shows basins of attraction and divergence  
-   - Demonstrates differences between GD and SGD  
-   - Highlights noisy vs. diminishing-noise behavior
+   - Demonstrates GD vs. SGD behavior  
+   - Highlights noisy vs. diminishing-noise trajectories
 
-Both objectives are one-dimensional so the dynamics can be plotted and understood visually.
+All experiments are one-dimensional, allowing the optimization dynamics
+to be visualized directly.
 
 ---
 
@@ -39,12 +42,17 @@ Both objectives are one-dimensional so the dynamics can be plotted and understoo
 - SGD with:
   - Constant step size  
   - Diminishing step size  
-- Shared RNG for reproducibility  
+
+- **Single shared NumPy RNG for reproducibility**  
+  (`rng = np.random.default_rng(SEED)`)  
+  — independent noise paths can be obtained by passing a fresh RNG instance.
+
 - Convergence metrics:
   - Final gap  
   - Best gap  
   - Steps-to-tolerance  
-- Plots for:
+
+- Visualizations:
   - GD step-size sweep (quadratic)  
   - Cubic function & derivative  
   - GD trajectories from multiple initializations  
@@ -54,11 +62,11 @@ Both objectives are one-dimensional so the dynamics can be plotted and understoo
 
 ## File Structure
 
-```test
+```text
 week01_gd_optimization/
 │
-├── gd_capstone.ipynb # Full implementation & plots
-└── README_week01_capstone.md # This document
+├── gd_capstone.ipynb          # Full implementation & plots
+└── README_week01_capstone.md  # This document
 ```
 
 ---
@@ -77,4 +85,4 @@ The notebook runs top-to-bottom on:
 https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone.ipynb
 )
 
-Dependencies: **NumPy** and **Matplotlib** only.
+Dependencies: **NumPy** and **Matplotlib** only
