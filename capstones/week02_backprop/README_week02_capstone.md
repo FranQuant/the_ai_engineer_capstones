@@ -1,3 +1,41 @@
+<table width="100%">
+<tr>
+
+<td style="vertical-align: top;">
+
+<h1>Week 02 Capstone — Backpropagation (TAE Program)</h1>
+
+<p><strong>Four-Stage Capstone:</strong><br>
+Manual Gradients → PyTorch Autograd → <code>nn.Module</code>
+</p>
+
+<p>
+This folder contains the full Week-02 Capstone completed following the TAE Program structure.<br>
+The goal is to implement a tiny <strong>1-hidden-layer MLP</strong>, step-by-step, moving from fully manual NumPy backprop to PyTorch’s <code>nn.Module</code> API.
+</p>
+
+</td>
+
+<td align="right" width="200">
+<img src="../../assets/tae_logo.png" alt="TAE Banner" width="160">
+</td>
+
+</tr>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Week 02 — Backpropagation (TAE Program)
 ## Four-Stage Capstone: Manual Gradients → PyTorch Autograd → `nn.Module`
 
