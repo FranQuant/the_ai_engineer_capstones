@@ -32,17 +32,17 @@ All notebooks use:
 
 Forward pass:
 
-$
+$$
 a_1 = W_1 x + b_1,\qquad
 h_1 = \mathrm{ReLU}(a_1),\qquad
 f = W_2 h_1 + b_2
-$
+$$
 
 Loss:
 
-$
+$$
 L = \frac{1}{2}(f - y)^2
-$
+$$
 
 ---
 
