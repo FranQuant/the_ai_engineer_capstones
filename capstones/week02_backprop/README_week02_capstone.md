@@ -24,24 +24,6 @@ The goal is to implement a tiny <strong>1-hidden-layer MLP</strong>, step-by-ste
 </table>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# Week 02 — Backpropagation (TAE Program)
-## Four-Stage Capstone: Manual Gradients → PyTorch Autograd → `nn.Module`
-
-This folder contains the full Week-02 Capstone completed following the TAE Program structure.
-The goal is to implement a tiny **1-hidden-layer MLP**, step-by-step, moving from fully manual NumPy backprop to PyTorch’s `nn.Module` API.
-
 All notebooks use:
 
 - Deterministic seeds  
@@ -64,6 +46,66 @@ $$
 
 ---
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<h3>Notebook 01 — <code>01_numpy_manual.ipynb</code></h3>
+<b>Goal:</b> Manual forward + backward pass in NumPy.<br>
+<b>Features:</b><br>
+– Manual ReLU + derivative<br>
+– Full chain-rule backprop<br>
+– Gradient checks<br>
+– Source-of-truth implementation
+
+</td>
+
+<td width="50%" valign="top">
+
+<h3>Notebook 02 — <code>02_pytorch_no_autograd.ipynb</code></h3>
+<b>Goal:</b> Reproduce NumPy forward pass in PyTorch without autograd.<br>
+<b>Features:</b><br>
+– <code>requires_grad = False</code><br>
+– Forward consistency vs NumPy<br>
+– Ensures math alignment before autograd<br>
+– Same seeds + dataset
+
+</td>
+</tr>
+
+<tr>
+<td width="50%" valign="top">
+
+<h3>Notebook 03 — <code>03_pytorch_autograd.ipynb</code></h3>
+<b>Goal:</b> Use PyTorch autograd and compare with manual gradients.<br>
+<b>Features:</b><br>
+– <code>loss.backward()</code> gradient flow<br>
+– Manual vs autograd gradient match<br>
+– Optional finite differences<br>
+– Prepares for <code>nn.Module</code>
+
+</td>
+
+<td width="50%" valign="top">
+
+<h3>Notebook 04 — <code>04_pytorch_nn_module.ipynb</code></h3>
+<b>Goal:</b> Wrap the model in <code>nn.Module</code> and train with mini-batch SGD.<br>
+<b>Features:</b><br>
+– Custom <code>TwoLayerXOR</code><br>
+– <code>DataLoader</code> shuffling<br>
+– SGD training loop (~200 epochs)<br>
+– Loss + gradient-norm diagnostics
+
+</td>
+</tr>
+</table>
+
+
+
+
+
+
+---
 ## Notebook 01 — `01_numpy_manual.ipynb`
 
 **Goal:** Build the complete forward + backward pass manually using NumPy.
