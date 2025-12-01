@@ -32,25 +32,31 @@ All notebooks use:
 
 Forward pass:
 
-$$
+$
 a_1 = W_1 x + b_1,\qquad
 h_1 = \mathrm{ReLU}(a_1),\qquad
 f = W_2 h_1 + b_2
-$$
+$
 
 Loss:
 
-$$
+$
 L = \frac{1}{2}(f - y)^2
-$$
+$
 
 ---
 
 <table>
 <tr>
+
 <td width="50%" valign="top">
 
 <h3>Notebook 01 — <code>01_numpy_manual.ipynb</code></h3>
+
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/Week02_backprop/01_numpy_manual.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
+</a>
+
 <b>Goal:</b> Manual forward + backward pass in NumPy.<br>
 <b>Features:</b><br>
 – Manual ReLU + derivative<br>
@@ -63,6 +69,11 @@ $$
 <td width="50%" valign="top">
 
 <h3>Notebook 02 — <code>02_pytorch_no_autograd.ipynb</code></h3>
+
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/Week02_backprop/02_pytorch_no_autograd.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
+</a>
+
 <b>Goal:</b> Reproduce NumPy forward pass in PyTorch without autograd.<br>
 <b>Features:</b><br>
 – <code>requires_grad = False</code><br>
@@ -71,12 +82,19 @@ $$
 – Same seeds + dataset
 
 </td>
+
 </tr>
 
 <tr>
+
 <td width="50%" valign="top">
 
 <h3>Notebook 03 — <code>03_pytorch_autograd.ipynb</code></h3>
+
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/Week02_backprop/03_pytorch_autograd.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 <b>Goal:</b> Use PyTorch autograd and compare with manual gradients.<br>
 <b>Features:</b><br>
 – <code>loss.backward()</code> gradient flow<br>
@@ -89,6 +107,11 @@ $$
 <td width="50%" valign="top">
 
 <h3>Notebook 04 — <code>04_pytorch_nn_module.ipynb</code></h3>
+
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/Week02_backprop/04_pytorch_nn_module.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 <b>Goal:</b> Wrap the model in <code>nn.Module</code> and train with mini-batch SGD.<br>
 <b>Features:</b><br>
 – Custom <code>TwoLayerXOR</code><br>
@@ -97,10 +120,9 @@ $$
 – Loss + gradient-norm diagnostics
 
 </td>
+
 </tr>
 </table>
-
-
 
 ---
 
@@ -121,3 +143,21 @@ It prepares the foundation for future Capstones involving:
 - Vision/sequence models  
 - Reinforcement learning  
 - Agentic training workflows  
+
+---
+
+## Dependencies (Minimal)
+
+For consistency with the rest of the repository, full environment specs are kept in the **root** `requirements.txt`.
+
+Minimal packages used in Week 02:
+
+```text
+numpy
+matplotlib
+torch
+tqdm
+```
+
+For the full environment used during development, see the root-level `requirements.txt`.
+
