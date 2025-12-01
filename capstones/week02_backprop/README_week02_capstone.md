@@ -3,7 +3,7 @@
 
 <td style="vertical-align: top;">
 
-<h1>Week 02 Capstone — Backpropagation (TAE Program)</h1>
+<h1>Week 02 Capstone — From Chain Rule to Backpropagation and `nn.Module`</h1>
 
 <p><strong>Four-Stage Capstone:</strong><br>
 Manual Gradients → PyTorch Autograd → <code>nn.Module</code>
