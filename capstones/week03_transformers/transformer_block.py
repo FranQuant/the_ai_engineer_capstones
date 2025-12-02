@@ -1,17 +1,15 @@
 """
-Step 3: Transformer Block (pre-LN) with MHA + FFN + residuals.
+Step 3: Transformer Block (pre-LN) with MHA + FFN + residuals + (optional) dropout.
 
 Grounding:
-- Handout Sections 6–7: pre-layernorm, residual paths, feedforward.
+- Handout Sections 6–7: pre-layernorm, residual paths, feedforward, dropout locations.
 - Reference: llmcode code/ch08_transformer.py::TransformerBlock.
 - Uses Step-2 MultiHeadAttention and Step-1 scaled dot-product attention.
 - Coach guide: deterministic seed, explicit shapes, micro-tests.
 
 Note:
-Mask semantics (causal/padding, broadcasting) are fully tested in:
-  - scaled_dot_product_attention.py (Step-1)
-  - multihead_attention.py (Step-2)
-Here we focus on block-level behavior: shapes + residual identity sanity.
+Mask semantics (boolean causal/padding mask, broadcastable to [B,H,T,T])
+are handled upstream in MiniTransformerLM; here we simply pass `attn_mask` to MHA.
 """
 
 from __future__ import annotations
@@ -26,41 +24,60 @@ torch.manual_seed(0)
 
 
 class TransformerBlock(nn.Module):
-    """Pre-LN Transformer block: MHA + FFN with residual connections."""
+    """
+    Pre-LN Transformer block with:
+        - LayerNorm
+        - Multi-Head Attention
+        - Residual connection
+        - Feedforward (FFN)
+        - Residual connection
+        - Optional dropout (default p=0.0 for deterministic Week-3 behavior)
+    """
 
-    def __init__(self, d_model: int, num_heads: int, d_ff: int):
+    def __init__(self, d_model: int, num_heads: int, d_ff: int, dropout: float = 0.0):
         super().__init__()
+
+        # LayerNorms (pre-norm architecture)
         self.ln1 = nn.LayerNorm(d_model)
         self.ln2 = nn.LayerNorm(d_model)
+
+        # Multi-Head Attention block
         self.mha = MultiHeadAttention(d_model, num_heads)
+
+        # Position-wise FFN
         self.ffn = nn.Sequential(
             nn.Linear(d_model, d_ff),
             nn.GELU(),
             nn.Linear(d_ff, d_model),
         )
 
-    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        # Dropout hooks (default no-op when p=0.0)
+        self.attn_dropout = nn.Dropout(dropout)
+        self.ffn_dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.Tensor, attn_mask: torch.Tensor | None = None) -> torch.Tensor:
         """
         Args:
-            x:   [B, T, d_model]
-            mask (optional):
-                 [T, T], [1, T, T], [B, 1, T, T], or [B, T, T]
-                 with 1 = keep, 0 = mask (MHA handles normalization).
+            x: [B, T, d_model]
+            attn_mask: broadcastable boolean mask (True=keep, False=mask);
+                       shapes allowed: [1,1,T,T], [B,1,T,T], [1,T,T], [B,T,T]
         Returns:
             [B, T, d_model]
         """
         assert x.ndim == 3, "x must be [B,T,D]"
         B, T, D = x.shape
 
-        # --- MHA path (pre-LN + residual) ---
-        x_norm = self.ln1(x)                 # [B,T,D]
-        attn_out = self.mha(x_norm, mask)    # [B,T,D]
-        x = x + attn_out                     # residual 1
+        # --- Multi-Head Attention path (Pre-LN + residual + dropout) ---
+        x_norm = self.ln1(x)                          # [B,T,D]
+        attn_out = self.mha(x_norm, attn_mask)        # [B,T,D]
+        attn_out = self.attn_dropout(attn_out)        # dropout (p=0.0 by default)
+        x = x + attn_out                              # residual 1
 
-        # --- FFN path (pre-LN + residual) ---
+        # --- Feedforward path (Pre-LN + residual + dropout) ---
         x_norm = self.ln2(x)
-        ffn_out = self.ffn(x_norm)           # [B,T,D]
-        x = x + ffn_out                      # residual 2
+        ffn_out = self.ffn(x_norm)                    # [B,T,D]
+        ffn_out = self.ffn_dropout(ffn_out)           # dropout (p=0.0 by default)
+        x = x + ffn_out                               # residual 2
 
         return x
 

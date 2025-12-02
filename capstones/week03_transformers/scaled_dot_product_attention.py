@@ -27,66 +27,65 @@ def scaled_dot_product_attention(
     """
     Compute Y = softmax(QK^T / sqrt(d_k)) @ V with optional mask.
 
-    q, k, v: shape [T,D] or [B,T,D]
-    mask: [T,T], [1,T,T], [B,1,T,T], [B,T,T], or per-head [B*H,T,T]
+    q, k, v: shape [T, D] or [B, T, D]
+    mask: [T,T], [1,T,T], [B,T,T], or 4D masks [1,1,T,T] / [B,1,T,T]
     """
     assert q.shape == k.shape == v.shape, "q, k, v must share shape"
 
-    original_2d = q.ndim == 2
+    # Accept [T,D] → promote to [1,T,D]
+    original_2d = (q.ndim == 2)
     if original_2d:
-        q, k, v = (t.unsqueeze(0) for t in (q, k, v))  # → [1,T,D]
+        q, k, v = (t.unsqueeze(0) for t in (q, k, v))  # [1,T,D]
 
     B, T, D = q.shape
 
-    # raw scores (before softmax stabilization)
+    # Raw scores
     raw_scores = (q @ k.transpose(-2, -1)) / math.sqrt(D)  # [B,T,T]
     scores = raw_scores.clone()
 
-    # =========================================================================
-    # MASK HANDLING (FINAL CORRECT VERSION)
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # Correct mask handling (Week-03 compliant, using -inf)
+    # -------------------------------------------------------------------------
     if mask is not None:
+        if mask.ndim == 2:              # [T,T]
+            mask = mask.unsqueeze(0)    # [1,T,T]
 
-        # Convert 2D → 3D
-        if mask.ndim == 2:          # [T,T]
-            mask = mask.unsqueeze(0)  # → [1,T,T]
-
-        elif mask.ndim == 3:
+        elif mask.ndim == 3:           # [1,T,T] or [B,T,T]
             batch_dim = mask.shape[0]
-
-            # Allowed: 1 (universal), B (per-batch), B*H (per-head from MHA)
-            if batch_dim == 1:
-                pass  # universal mask
-            elif batch_dim == B:
-                mask = mask.unsqueeze(1)  # → [B,1,T,T]
+            if batch_dim == 1:         # shared mask
+                pass
+            elif batch_dim == B:       # per-batch mask
+                pass
             else:
-                assert batch_dim % B == 0, \
-                    f"Invalid mask batch={batch_dim}, expected 1, B, or B*H"
+                raise ValueError(f"Unsupported 3D mask shape {mask.shape}")
 
         elif mask.ndim == 4:
-            # Expected shapes: [1,1,T,T], [B,1,T,T], or [B*H,1,T,T]
-            batch_dim = mask.shape[0]
-            assert mask.shape[-2:] == (T, T)
-            assert batch_dim in (1, B) or batch_dim % B == 0, \
-                f"Invalid mask batch={batch_dim}"
+            # Allow [1,1,T,T] or [B,1,T,T] → squeeze head dim
+            if mask.shape[1] == 1 and mask.shape[-2:] == (T, T):
+                mask = mask[:, 0]      # → [1,T,T] or [B,T,T]
+            else:
+                raise ValueError(f"Unsupported 4D mask shape {mask.shape}")
 
         else:
-            raise ValueError("mask must have dim 2, 3, or 4")
+            raise ValueError(f"Unsupported mask shape {mask.shape}")
 
-        # Final checks
-        assert mask.shape[-2:] == (T, T)
+        assert mask.shape[-2:] == (T, T), f"Mask spatial dims must be T×T, got {mask.shape}"
 
-        # Apply mask
-        mask = mask.to(device=scores.device, dtype=scores.dtype)
-        scores = scores + (mask == 0) * (-1e9)
+        # Masked positions → -inf before softmax
+        mask = mask.to(dtype=torch.bool, device=scores.device)
+        scores = scores.masked_fill(~mask, float("-inf"))
 
-    # stable softmax
-    scores = scores - scores.max(dim=-1, keepdim=True).values
-    attn = torch.softmax(scores, dim=-1)
-    out = attn @ v
+    # Stable softmax
+    stable = scores - scores.max(dim=-1, keepdim=True).values
+    attn = torch.softmax(stable, dim=-1)   # [B,T,T]
 
+    # Weighted sum of values
+    out = attn @ v                         # [B,T,D]
+
+    # Restore [T,D] if original input was [T,D]
     if original_2d:
         out = out.squeeze(0)
+
     return out
 
 
@@ -109,7 +108,7 @@ def raw_scores_and_attn(q, k, mask=None):
 
 
 # ============================================================================
-# Test 1 — Raw numeric example (exactly as in handout)
+# Test 1 — Handout numeric example
 # ============================================================================
 def _test_numeric_example():
     Q = torch.tensor([[1.0, 0.0],
@@ -143,9 +142,9 @@ def _test_numeric_example():
     raw, A = raw_scores_and_attn(Q, K)
     Y = scaled_dot_product_attention(Q, K, V)
 
-    print("Test 1: Raw scores:\n", raw)
-    print("Attention A:\n", A)
-    print("Output Y:\n", Y)
+    print("Test 1: Raw scores\n", raw)
+    print("Test 1: Attention\n", A)
+    print("Test 1: Y\n", Y)
 
     assert torch.allclose(raw, expected_raw, atol=1e-6)
     assert torch.allclose(A, expected_attn, atol=1e-6)
@@ -173,10 +172,9 @@ def _test_causal_mask():
     _, A_masked = raw_scores_and_attn(Q, K, causal)
     Y_masked = scaled_dot_product_attention(Q, K, V, causal)
 
-    print("Test 2: Causal masking")
-    print("A (unmasked):\n", A_unmasked)
-    print("A (masked):\n", A_masked)
-    print("Y masked:\n", Y_masked)
+    print("Test 2: A unmasked\n", A_unmasked)
+    print("Test 2: A masked\n", A_masked)
+    print("Test 2: Y masked\n", Y_masked)
 
     expected_masked = torch.tensor([
         [1.0,        0.0,        0.0],
@@ -184,7 +182,6 @@ def _test_causal_mask():
         [0.24825508, 0.50348984, 0.24825508],
     ])
 
-    # A_masked returned as [1,1,3,3], so squeeze
     A_masked_squeezed = A_masked.squeeze()
     assert torch.allclose(A_masked_squeezed, expected_masked, atol=1e-6)
     print("✓ Causal mask behaves correctly\n")
@@ -199,10 +196,10 @@ def _test_shapes():
     k = torch.randn(B, T, D)
     v = torch.randn(B, T, D)
 
-    # This MUST broadcast correctly to [B,T,T]
+    # Shared mask across batch
     mask = torch.ones(1, T, T)
-
     y = scaled_dot_product_attention(q, k, v, mask)
+    print("Test 3: y.shape", y.shape)
     assert y.shape == (B, T, D)
     print("✓ Shape test passed:", y.shape, "\n")
 
