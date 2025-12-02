@@ -9,7 +9,7 @@ Tokenization → Positional Encoding → Multi-Head Attention → Mini GPT LM
 </p>
 
 <p>
-This folder implements a fully-compliant **decoder-only Transformer** from first principles, following the Week-03 TAE capstone requirements.
+This folder implements a fully-compliant decoder-only Transformer from first principles, following the Week-03 TAE capstone requirements.
 
 The model is intentionally tiny and transparent, enabling full interpretability and step-by-step introspection of attention, residuals, embeddings, and sampling behavior.
 </p>
