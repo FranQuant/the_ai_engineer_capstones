@@ -14,7 +14,7 @@ This capstone implements a deterministic Incident Command Agent running the PAL 
 - **Remote MCP agent** — uses JSON‑RPC over WebSockets to communicate with the MCP server.
 - **Shared telemetry system** — every OPAL phase logs structured JSONL to `artifacts/`.
 
-All state lives inside <code>memory://</code> resources**, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
+All state lives inside <code>memory:// resources</code>, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
 </p>
 
 </td>
