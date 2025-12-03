@@ -17,8 +17,6 @@ methods on simple 1-D functions.
 </table>
 
 
-
-
 ## Overview
 
 This notebook explores the behavior of Gradient Descent (GD) and Stochastic Gradient Descent (SGD) on two instructional objectives:
