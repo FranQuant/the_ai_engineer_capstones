@@ -8,15 +8,6 @@ This repository contains all capstone projects for <i>The AI Engineer</i> (Nov 2
 Each week builds a complete, self-contained project with a clean software-engineering  
 structure, reproducibility, diagnostics, and proper documentation.
 
-<!-- Badges -->
-<p>
-  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white">
-  <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white">
-  <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white">
-  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey">
-  <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple">
-</p>
-
 </td>
 
 <td align="right" width="200">
@@ -24,6 +15,15 @@ structure, reproducibility, diagnostics, and proper documentation.
 </td>
 </tr>
 </table>
+
+<!-- Badges -->
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white">
+  <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white">
+  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey">
+  <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple">
+</p>
 
 
 ---
