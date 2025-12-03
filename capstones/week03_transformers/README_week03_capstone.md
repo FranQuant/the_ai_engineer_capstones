@@ -22,8 +22,6 @@ The model is intentionally tiny and transparent, enabling full interpretability 
 </table>
 
 
-
-
 ## Project Overview
 
 This capstone implements a complete minimal GPT-style language model:
@@ -64,34 +62,33 @@ week03_transformers/
 ## Model Architecture (Minimal Diagram)
 
 ```text
-Input Token IDs
-       │
-       ▼
-Token Embedding + Sinusoidal Positional Encoding
-       │
-       ▼
-┌─────────────────────────────┐
-│     Transformer Block       │
-│  • LayerNorm (pre-LN)       │
-│  • Multi-Head Attention     │
-│  • Residual Add + Dropout   │
-│  • LayerNorm (pre-LN)       │
-│  • Feedforward (GELU)       │
-│  • Residual Add + Dropout   │
-└─────────────────────────────┘
-       │
-       ▼
-Final LayerNorm
-       │
-       ▼
-LM Head (Linear → vocab_size)
-       │
-       ▼
-Next-Token Logits
+            Input Token IDs
+                   │
+                   ▼
+   Token Embedding + Sinusoidal Positional Encoding
+                   │
+                   ▼
+    ┌─────────────────────────────┐
+    │     Transformer Block       │
+    │  • LayerNorm (pre-LN)       │
+    │  • Multi-Head Attention     │
+    │  • Residual Add + Dropout   │
+    │  • LayerNorm (pre-LN)       │
+    │  • Feedforward (GELU)       │
+    │  • Residual Add + Dropout   │
+    └─────────────────────────────┘
+                   │
+                   ▼
+            Final LayerNorm
+                   │
+                   ▼
+    LM Head (Linear → vocab_size)
+                   │
+                   ▼
+            Next-Token Logits
 
 ```
 
----
 
 ## Training the Mini GPT
 
@@ -168,4 +165,4 @@ This capstone is intentionally small, transparent, and designed for learning:
 
 The notebook provides interpretability tools similar to those used in real model-debugging workflows.
 
----
+--
