@@ -49,7 +49,7 @@ $$
 
 <h3>Notebook 01 — <code>01_numpy_manual.ipynb</code></h3>
 
-<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/Week02_backprop/01_numpy_manual.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/01_numpy_manual.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
 </a>
 
@@ -66,7 +66,7 @@ $$
 
 <h3>Notebook 02 — <code>02_pytorch_no_autograd.ipynb</code></h3>
 
-<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/Week02_backprop/02_pytorch_no_autograd.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/02_pytorch_no_autograd.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
 </a>
 
@@ -87,7 +87,7 @@ $$
 
 <h3>Notebook 03 — <code>03_pytorch_autograd.ipynb</code></h3>
 
-<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/Week02_backprop/03_pytorch_autograd.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/03_pytorch_autograd.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
@@ -104,7 +104,7 @@ $$
 
 <h3>Notebook 04 — <code>04_pytorch_nn_module.ipynb</code></h3>
 
-<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/Week02_backprop/04_pytorch_nn_module.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/04_pytorch_nn_module.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
