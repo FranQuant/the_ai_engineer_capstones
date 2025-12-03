@@ -147,14 +147,22 @@ print_every = 100
 
 print("Starting training...\n")
 
+# Persistent iterator so we actually walk the whole DataLoader over time
+train_iter = iter(train_loader)
+
 for step in range(max_iters):
     # dynamic LR schedule
     lr = get_lr(step)
     for pg in optimizer.param_groups:
         pg["lr"] = lr
 
-    # batch
-    x, y = next(iter(train_loader))
+    # Get next batch; reset iterator when exhausted
+    try:
+        x, y = next(train_iter)
+    except StopIteration:
+        train_iter = iter(train_loader)
+        x, y = next(train_iter)
+
     x, y = x.to(device), y.to(device)
 
     # forward pass (model auto-creates causal mask)
@@ -184,6 +192,7 @@ print("\nModel checkpoint saved → mini_gpt.pt\n")
 # -------------------------------------------------------------------------
 # 10. Sampling helper (GPT-style generation)
 # -------------------------------------------------------------------------
+@torch.no_grad()
 def generate(model, start_tokens, max_new_tokens=100, temperature=1.0, top_k=None):
     """GPT-style autoregressive sampling."""
     model.eval()

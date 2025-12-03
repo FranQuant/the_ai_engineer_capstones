@@ -36,7 +36,8 @@ This capstone implements a complete minimal GPT-style language model:
 - **Diagnostics notebook for attention maps, embeddings, entropy, sampling, etc.**
 
 Everything is implemented **from scratch** without helper libraries.
-The model is intentionally tiny and transparent, enabling full interpretability and step-by-step introspection of attention, residuals, embeddings, and sampling behavior.
+
+**Note:** The diagnostics notebook rebuilds the tokenizer using the exact same corpus as `train_mini_gpt.py`. Any mismatch breaks visualizations.
 
 ---
 
@@ -87,9 +88,22 @@ week03_transformers/
             Next-Token Logits
 
 ```
+---
 
 
-## Training the Mini GPT
+## Quick Test (Recommended)
+
+From inside `week03_transformers/`:
+
+```bash
+# Step-by-step module verification
+python scaled_dot_product_attention.py
+python multihead_attention.py
+python transformer_block.py
+python mini_transformer.py
+```
+
+## Training the Mini GPT (saves mini_gpt.pt)
 
 Run:
 
@@ -129,6 +143,8 @@ The notebook `mini_gpt_diagnostics.ipynb` includes:
 - Embedding PCA/TSNE visualization
 - Logits histogram + entropy
 - Temperature, greedy, and top-k sampling
+
+**Note:** The diagnostics notebook rebuilds the tokenizer using the **exact same corpus** as `train_mini_gpt.py`. Any mismatch will break token-level visualizations.
 
 ---
 

@@ -20,8 +20,8 @@ import math
 import torch
 import torch.nn as nn
 
-# We will use the standalone function once patched:
-from scaled_dot_product_attention import scaled_dot_product_attention
+
+from scaled_dot_product_attention import scaled_dot_product_attention # used in tests
 
 torch.manual_seed(0)
 
