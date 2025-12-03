@@ -6,12 +6,10 @@
 
 <p><strong>Four-Stage Capstone:</strong><br>
 Tokenization → Positional Encoding → Multi-Head Attention → Mini GPT LM
-</p>
 
 <p>
 This folder implements a fully-compliant decoder-only Transformer from first principles, following the Week-03 TAE capstone requirements.
 
-The model is intentionally tiny and transparent, enabling full interpretability and step-by-step introspection of attention, residuals, embeddings, and sampling behavior.
 </p>
 
 </td>
@@ -38,6 +36,7 @@ This capstone implements a complete minimal GPT-style language model:
 - **Diagnostics notebook for attention maps, embeddings, entropy, sampling, etc.**
 
 Everything is implemented **from scratch** without helper libraries.
+The model is intentionally tiny and transparent, enabling full interpretability and step-by-step introspection of attention, residuals, embeddings, and sampling behavior.
 
 ---
 

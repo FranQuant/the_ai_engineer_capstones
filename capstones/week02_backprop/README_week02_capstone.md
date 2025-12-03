@@ -3,11 +3,8 @@
 
 <td style="vertical-align: top;">
 
-<h1>Week 02 Capstone — From Chain Rule to Backpropagation and <code>nn.Module</code></h1>
+<h1>Week 2 Capstone — From Chain Rule to Backpropagation and <code>nn.Module</code></h1>
 
-<p><strong>Four-Stage Capstone:</strong><br>
-Manual Gradients → PyTorch Autograd → <code>nn.Module</code>
-</p>
 
 <p>
 This folder contains the full Week-02 Capstone completed following the TAE Program structure.<br>

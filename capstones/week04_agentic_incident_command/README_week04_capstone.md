@@ -4,11 +4,8 @@
 
 <h1>Week 04 Capstone — Agentic Incident Command</h1>
 
-<h3>1. Executive Overview</h3>
-
-
 <p>
-This capstone implements a deterministic Incident Command Agent running the PAL loop (Observe → Plan → Act → Learn) across:
+Deterministic Incident Command Agent using the PAL loop (Observe → Plan → Act → Learn) across:
 
 - **Local deterministic agent** — pure in‑process tools, deterministic outputs.
 - **Remote MCP agent** — uses JSON‑RPC over WebSockets to communicate with the MCP server.
