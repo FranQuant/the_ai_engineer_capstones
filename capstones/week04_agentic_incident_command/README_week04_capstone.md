@@ -25,7 +25,7 @@ All state lives inside <code>memory://resources</code>, making the entire workfl
 
 ---
 
-## 2. Architecture 
+## 1. Architecture 
 
 ### A. OPAL Loop
 ```mermaid
@@ -65,7 +65,7 @@ flowchart TD
 
 ---
 
-## 3. Module-by-Module Summary
+## 2. Module-by-Module Summary
 
 | Module | Purpose | Telemetry |
 |-------|----------|-----------|
@@ -83,7 +83,7 @@ flowchart TD
 
 ---
 
-## 4. Key Features
+## 3. Key Features
 
 ### Deterministic Planning
 The planner always returns the same ordered 5-step OPAL plan:
@@ -124,7 +124,7 @@ python cli.py --replay artifacts/telemetry.jsonl
 
 ---
 
-## 5. Usage
+## 4. Usage
 
 ### A. Local Deterministic OPAL Run
 ```bash
@@ -149,7 +149,7 @@ python 02_incident_command_agent/cli.py --replay artifacts/telemetry.jsonl
 
 ---
 
-## 6. Guardrails
+## 5. Guardrails
 
 - `Budget(tokens=2000, ms=150, dollars=0.0)`
 - `max_steps = 5`
