@@ -22,7 +22,7 @@ The model is intentionally tiny and transparent, enabling full interpretability 
 </table>
 
 
----
+
 
 ## Project Overview
 
@@ -64,7 +64,7 @@ week03_transformers/
 ## Model Architecture (Minimal Diagram)
 
 ```text
-              Input Token IDs
+Input Token IDs
        │
        ▼
 Token Embedding + Sinusoidal Positional Encoding
