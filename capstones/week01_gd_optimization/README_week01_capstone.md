@@ -16,47 +16,49 @@ methods on simple 1-D functions.
 </tr>
 </table>
 
+
+---
+
+
 ## Overview
 
-The notebook explores how Gradient Descent (GD) and Stochastic Gradient Descent (SGD)
-behave on two instructional objectives:
+This notebook explores the behavior of Gradient Descent (GD) and Stochastic Gradient Descent (SGD) on two instructional objectives:
 
 1. **Quadratic baseline**
-   - Convex, smooth objective  
-   - Used to study stability and step-size effects  
-   - Includes the required learning-rate sweep
+   • Convex and smooth  
+   • Used to study stability and learning-rate effects  
+   • Includes the required step-size sweep
 
 2. **Cubic non-convex function**
-   - Shows basins of attraction and divergence  
-   - Demonstrates GD vs. SGD behavior  
-   - Highlights noisy vs. diminishing-noise trajectories
+   • Exhibits multiple basins of attraction  
+   • Highlights divergence vs. convergence paths  
+   • Demonstrates noisy vs. diminishing-noise SGD trajectories  
 
-All experiments are one-dimensional, allowing the optimization dynamics
-to be visualized directly.
+All experiments are one-dimensional, enabling direct visualization of optimization dynamics.
 
 ---
 
 ## What’s Implemented
 
-- Deterministic Gradient Descent  
-- SGD with:
-  - Constant step size  
-  - Diminishing step size  
+• Deterministic Gradient Descent  
+• Stochastic Gradient Descent with:
+  – Constant step size  
+  – Diminishing step size  
 
-- **Single shared NumPy RNG for reproducibility**  
+• **Single shared NumPy RNG for reproducibility**  
   (`rng = np.random.default_rng(SEED)`)  
-  — independent noise paths can be obtained by passing a fresh RNG instance.
+  Fresh trajectories can be produced by supplying a new RNG instance.
 
-- Convergence metrics:
-  - Final gap  
-  - Best gap  
-  - Steps-to-tolerance  
+• Convergence diagnostics:
+  – Final gap  
+  – Best gap  
+  – Steps-to-tolerance  
 
-- Visualizations:
-  - GD step-size sweep (quadratic)  
-  - Cubic function & derivative  
-  - GD trajectories from multiple initializations  
-  - SGD vs. diminishing-SGD trajectories  
+• Visualizations:
+  – GD step-size sweep (quadratic)  
+  – Cubic function and derivative  
+  – GD trajectories from multiple initializations  
+  – SGD vs. diminishing-SGD trajectoriess  
 
 ---
 
