@@ -84,7 +84,7 @@ pip install -r requirements.txt   # optional, add later
 
 ```
 
-·## License (Educational Use)
+### License (Educational Use)
 
 All content in this repository is provided **for educational and illustrative purposes only**.  
 No guarantees are made regarding correctness, performance, reliability, or suitability for any production environment.
