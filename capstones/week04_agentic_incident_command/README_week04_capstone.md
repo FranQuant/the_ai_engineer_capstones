@@ -5,13 +5,13 @@
 <h1>Week 04 Capstone — Agentic Incident Command</h1>
 
 <p>
-Deterministic Incident Command Agent using the PAL loop (Observe → Plan → Act → Learn) across:
+Incident Command Agent using the PAL loop (Observe → Plan → Act → Learn) across:
 
 - **Local deterministic agent** — pure in‑process tools, deterministic outputs.
 - **Remote MCP agent** — uses JSON‑RPC over WebSockets to communicate with the MCP server.
 - **Shared telemetry system** — every OPAL phase logs structured JSONL to `artifacts/`.
 
-All state lives inside <code>memory:// resources</code>, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
+All state lives inside <code>memory://resources</code>, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
 </p>
 
 </td>
