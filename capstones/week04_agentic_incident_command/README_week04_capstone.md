@@ -1,23 +1,34 @@
-# Week 04 Capstone — Agentic Incident Command
+<table width="100%">
+<tr>
+<td style="vertical-align: top;">
 
-A refined, concise version of your original README while preserving all essential structure, diagrams, and module explanations.  
-(You requested a shorter, cleaner, but still complete README.)
+<h1>Week 04 Capstone — Agentic Incident Command</h1>
 
----
+<h3>1. Executive Overview</h3>
 
-## 1. Executive Overview
 
+<p>
 This capstone implements a **deterministic Incident Command Agent** running the **OPAL loop** (Observe → Plan → Act → Learn) across:
 
 - **Local deterministic agent** — pure in‑process tools, deterministic outputs.
 - **Remote MCP agent** — uses JSON‑RPC over WebSockets to communicate with the MCP server.
 - **Shared telemetry system** — every OPAL phase logs structured JSONL to `artifacts/`.
 
-All state lives inside **`memory://` resources**, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
+All state lives inside <code>memory://</code> resources**, making the entire workflow deterministic, replayable, and ideal for debugging or demos.
+</p>
+
+</td>
+
+<td align="right" width="200">
+<img src="../../assets/tae_logo.png" alt="TAE Banner" width="160">
+</td>
+
+</tr>
+</table>
 
 ---
 
-## 2. Architecture (Mermaid Diagrams)
+## 2. Architecture 
 
 ### A. OPAL Loop
 ```mermaid
@@ -77,7 +88,7 @@ flowchart TD
 
 ## 4. Key Features
 
-### 🔹 Deterministic Planning
+### Deterministic Planning
 The planner always returns the same ordered 5-step OPAL plan:
 
 1. `retrieve_runbook`
@@ -86,14 +97,14 @@ The planner always returns the same ordered 5-step OPAL plan:
 4. `add_evidence`
 5. `summarize_incident`
 
-### 🔹 Deterministic Tools
+### Deterministic Tools
 Local and remote tools return predictable synthetic envelopes with:
 
 ```json
 { "status": "ok", "data": {...}, "metrics": { "latency_ms": X }}
 ```
 
-### 🔹 Telemetry Everywhere
+### Telemetry Everywhere
 Each OPAL phase emits:
 
 - `observe_start/end`
