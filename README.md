@@ -9,12 +9,11 @@
   <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white" alt="Conda Ready">
   <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white" alt="Colab Friendly">
   <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey" alt="Educational Use License">
-  <img src="https://img.shields.io/badge/Last%20Updated-November%202025-purple" alt="Last Updated">
+  <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple" alt="Last Updated">
 </p>
 
-This repository contains my complete implementations of the capstone projects for <em>The AI Engineer</em> program (Nov 2025 Cohort).  
-Each capstone is clean, reproducible, and aligned with software-engineering best practices.
-
+This repository contains all capstone projects for **_The AI Engineer_** (Nov 2025 Cohort).  
+Each week builds a complete, self-contained project with a clean software-engineering structure, reproducibility, diagnostics, and proper documentation.
 
 ---
 
@@ -22,10 +21,10 @@ Each capstone is clean, reproducible, and aligned with software-engineering best
 
 | Week | Capstone | Summary | Colab Link |
 |------|----------|---------|------------|
-| **1** | **Gradient Descent Optimization** | Implement GD & SGD from scratch, analyze convergence, step‑size sensitivity, and basin‑dependent dynamics. | [Open in Colab](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone_final.ipynb) |
+| **1** | **Gradient Descent Optimization** | Implement GD & SGD from scratch, analyze convergence, step-size sensitivity, and basin-dependent dynamics. | [Open in Colab](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week01_gd_optimization/gd_capstone_final.ipynb) |
 | **2** | **Backpropagation** | Manual chain rule, custom autograd, tiny MLP, PyTorch autograd, and nn.Module training loop. | [01](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/01_numpy_manual.ipynb) • [02](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/02_pytorch_no_autograd.ipynb) • [03](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/03_pytorch_autograd.ipynb) • [04](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week02_backprop/04_pytorch_nn_module.ipynb) |
-| **3** | **Tiny Transformer** | Build tokenizer, SDPA, MHA, pre-LN transformer block, decoder-only model, training loop, sampling, and a full diagnostics suite. | [Diagnostics Notebook](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week03_transformers/mini_gpt_diagnostics.ipynb) | 
-| **4** | **Agent Demo** | Minimal LLM‑powered agent with clean abstractions, tracing, and monitoring. | _Coming soon_ |
+| **3** | **Tiny Transformer** | Build tokenizer, SDPA, MHA, pre-LN transformer block, decoder-only model, training loop, sampling, and a full diagnostics suite. | [Diagnostics Notebook](https://colab.research.google.com/github/FranQuant/the_ai_engineer_capstones/blob/main/capstones/week03_transformers/mini_gpt_diagnostics.ipynb) |
+| **4** | **Agent Demo** | Minimal LLM-powered agent with clean abstractions, tracing, telemetry, and a deterministic OPAL loop implementation. | [README](./capstones/week04_agent_demo/README_week04_capstone.md) |
 
 ---
 
@@ -34,35 +33,69 @@ Each capstone is clean, reproducible, and aligned with software-engineering best
 ```
 the_ai_engineer_capstones/
 │
-├── README.md
+├── README.md # Root README (you are here)
 ├── assets/
-│   └── tae_logo.png
+│ └── tae_logo.png # Branding assets
 │
 └── capstones/
-    ├── week01_gd_optimization/
-    ├── week02_backprop/
-    ├── week03_transformers/       
-    └── week04_agent_demo/             
+├── week01_gd_optimization/ # Gradient Descent capstone
+├── week02_backprop/ # Backpropagation capstone
+├── week03_transformers/ # Tiny Transformer capstone
+└── week04_agent_demo/ # Week 4 MCP/Agent demo + OPAL loop           
 ```
 
+Each capstone folder contains:
+- A dedicated README  
+- Clean, modular Python files  
+- Colab-friendly notebooks  
+- Deterministic seeds  
+- Reproducible plots and outputs
+- 
 ---
 
 ## Environment & Reproducibility
 
-```
-conda env create -f environment.yml
+This repository supports both **Conda** and **pip** workflows.
+
+### Option A — Conda (recommended)
+
+```bash
+conda create -n tae python=3.11
 conda activate tae
+pip install -r requirements.txt 
+
 ```
 
-- deterministic seeds  
-- clean separation of logic/plots  
-- fully programmatic datasets  
-- each capstone self‑contained  
+### Option B — pip
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt   # optional, add later
+
+```
+
+-## License (Educational Use)
+
+All content in this repository is provided **for educational and illustrative purposes only**.  
+No guarantees are made regarding correctness, performance, reliability, or suitability for any production environment.
 
 ---
 
-## Status
+### ⚠️ Warning — Agentic Systems
 
-**Week 1 — Completed**  
-**Week 2 — Completed**  
-Weeks 3–4 — *In progress*  
+Agentic systems — especially those capable of taking actions, orchestrating tools, or modifying state — can introduce **significant safety risks**.
+
+Before using any such system outside a controlled environment, always:
+
+- Validate all outputs manually  
+- Run code inside a sandboxed environment  
+- Apply strict guardrails and permissions  
+- Never connect an agent to real infrastructure without full safety checks  
+
+Use responsibly.
+
+© 2025 Francisco Salazar
+
+---
+
+
