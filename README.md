@@ -16,7 +16,6 @@ structure, reproducibility, diagnostics, and proper documentation.
 </tr>
 </table>
 
-<!-- Badges -->
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white">
   <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white">
@@ -24,7 +23,6 @@ structure, reproducibility, diagnostics, and proper documentation.
   <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey">
   <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple">
 </p>
-
 
 ---
 
