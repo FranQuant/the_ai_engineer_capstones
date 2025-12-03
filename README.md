@@ -4,7 +4,7 @@
 
 <h1>The AI Engineer — Capstone Projects</h1>
 
-This repository contains all capstone projects for <i>The AI Engineer</i> (Nov 2025 Cohort).  
+This repository contains all capstone projects for <i>The AI Engineer</i> program (Nov 2025 Cohort).  
 Each week builds a complete, self-contained project with a clean software-engineering structure, reproducibility, diagnostics, and proper documentation.
 
 </td>
