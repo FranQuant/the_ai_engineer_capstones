@@ -8,7 +8,7 @@
 
 
 <p>
-This capstone implements a **deterministic Incident Command Agent** running the **OPAL loop** (Observe → Plan → Act → Learn) across:
+This capstone implements a deterministic Incident Command Agent running the PAL loop (Observe → Plan → Act → Learn) across:
 
 - **Local deterministic agent** — pure in‑process tools, deterministic outputs.
 - **Remote MCP agent** — uses JSON‑RPC over WebSockets to communicate with the MCP server.
