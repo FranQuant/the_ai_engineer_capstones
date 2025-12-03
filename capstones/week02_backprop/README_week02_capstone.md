@@ -156,7 +156,6 @@ Minimal packages used in Week 02:
 numpy
 matplotlib
 torch
-tqdm
 ```
 
 For the full environment used during development, see the root-level `requirements.txt`.
