@@ -164,5 +164,3 @@ This capstone is intentionally small, transparent, and designed for learning:
 - Fully inspectable attention & residual streams  
 
 The notebook provides interpretability tools similar to those used in real model-debugging workflows.
-
---
