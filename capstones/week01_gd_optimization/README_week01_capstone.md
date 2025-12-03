@@ -17,7 +17,6 @@ methods on simple 1-D functions.
 </table>
 
 
----
 
 
 ## Overview
