@@ -10,11 +10,11 @@ structure, reproducibility, diagnostics, and proper documentation.
 
 <!-- Badges -->
 <p>
-  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white" alt="Conda Ready">
-  <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white" alt="Colab Friendly">
-  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey" alt="Educational Use License">
-  <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple" alt="Last Updated">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/Conda-Ready-green?logo=anaconda&logoColor=white">
+  <img src="https://img.shields.io/badge/Colab-Friendly-brightgreen?logo=googlecolab&logoColor=white">
+  <img src="https://img.shields.io/badge/License-Educational%20Use-lightgrey">
+  <img src="https://img.shields.io/badge/Last%20Updated-December%202025-purple">
 </p>
 
 </td>
