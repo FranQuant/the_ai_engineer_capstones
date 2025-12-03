@@ -1,5 +1,9 @@
 """
 JSON-RPC 2.0 WebSocket client for the Incident MCP server with telemetry.
+Now MCP-compliant with:
+- Proper content[]/mimeType unwrapping (Fix #7B)
+- Strict JSON-RPC error handling
+- Request/response validation helpers
 """
 
 from __future__ import annotations
@@ -11,6 +15,46 @@ import websockets
 
 from telemetry import Budget, RunContext, TelemetryEvent, TelemetryLogger
 
+
+# ---------------------------------------------------------------------------
+# Helper functions for MCP envelopes (Fix #7B)
+# ---------------------------------------------------------------------------
+
+def _unwrap_mcp_result(result: Dict[str, Any]) -> Any:
+    """
+    MCP-compliant result parser.
+    We expect:
+        result = {
+            "content": [{"type": "text", "text": "..."}],
+            "mimeType": "application/json"
+        }
+    But we fall back safely if server returns legacy shapes.
+    """
+
+    # New MCP shape
+    if isinstance(result, dict) and "content" in result:
+        content = result.get("content") or []
+        if isinstance(content, list) and content:
+            item = content[0]
+            # text blocks
+            if item.get("type") == "text":
+                return item.get("text")
+            # json blocks
+            if item.get("type") == "json":
+                return item.get("data")
+        return result
+
+    # Legacy server envelope
+    if "data" in result:
+        return result["data"]
+
+    # Raw payload
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Client implementation
+# ---------------------------------------------------------------------------
 
 class MCPClient:
     def __init__(
@@ -26,28 +70,39 @@ class MCPClient:
         self.budget = budget or Budget(tokens=2000, ms=150, dollars=0.0)
         self.ctx: Optional[RunContext] = None
 
+        # Fix 5C
+        self.server_info: Optional[Dict[str, Any]] = None
+        self.server_protocol: Optional[str] = None
+
     def set_context(self, ctx: RunContext) -> None:
         """Attach a run context for correlation-id aware telemetry."""
         self.ctx = ctx
 
     async def connect(self) -> None:
-        """Open a WebSocket connection to the MCP server."""
-        self._ws = await websockets.connect(self.uri)
+        """Open WebSocket connection using MCP subprotocol."""
+        self._ws = await websockets.connect(self.uri, subprotocols=["mcp"])
         self._next_id = 1
 
     async def close(self) -> None:
-        """Close the WebSocket connection if open."""
         if self._ws is not None:
             await self._ws.close()
             self._ws = None
 
+    # -----------------------------------------------------------------------
+    # Core JSON-RPC call
+    # -----------------------------------------------------------------------
+
     async def rpc(self, method: str, params: Dict[str, Any]) -> Any:
-        """Send a JSON-RPC 2.0 request and return the result or raise on error."""
+        """Send a JSON-RPC 2.0 request and return the unwrapped MCP result."""
         if self._ws is None:
             raise RuntimeError("Client is not connected")
+
         req_id = self._next_id
         self._next_id += 1
+
         request = {"jsonrpc": "2.0", "id": req_id, "method": method, "params": params}
+
+        # Telemetry: send
         if self.telemetry and self.ctx:
             self.telemetry.log(
                 TelemetryEvent(
@@ -61,9 +116,16 @@ class MCPClient:
                     payload={"request": request},
                 )
             )
+
         await self._ws.send(json.dumps(request))
         raw = await self._ws.recv()
-        response = json.loads(raw)
+
+        try:
+            response = json.loads(raw)
+        except Exception:
+            raise RuntimeError(f"Malformed JSON response: {raw!r}")
+
+        # Telemetry: receive
         if self.telemetry and self.ctx:
             self.telemetry.log(
                 TelemetryEvent(
@@ -77,21 +139,43 @@ class MCPClient:
                     payload={"response": response},
                 )
             )
+
+        # JSON-RPC error
         if "error" in response:
             raise RuntimeError(response["error"])
-        return response.get("result")
+
+        # Extract result
+        result = response.get("result")
+        if result is None:
+            raise RuntimeError(f"Missing 'result' field in response: {response}")
+
+        # MCP unwrap (Fix #7B)
+        return _unwrap_mcp_result(result)
+
+    # -----------------------------------------------------------------------
+    # MCP methods
+    # -----------------------------------------------------------------------
 
     async def initialize(self) -> Any:
-        """Call initialize on the MCP server."""
-        return await self.rpc("initialize", {})
+        params = {
+            "protocolVersion": "2024-11-05",
+            "clientInfo": {"name": "week04-agentic-incident-client", "version": "1.0.0"},
+        }
+
+        result = await self.rpc("initialize", params)
+
+        # Save server metadata
+        if isinstance(result, dict):
+            self.server_info = result.get("serverInfo")
+            self.server_protocol = result.get("protocolVersion")
+
+        return result
 
     async def get_resource(self, uri: str, cursor: Optional[str] = None) -> Any:
-        """Call getResource on the MCP server."""
         params: Dict[str, Any] = {"uri": uri}
         if cursor is not None:
             params["cursor"] = cursor
         return await self.rpc("getResource", params)
 
     async def call_tool(self, name: str, arguments: Dict[str, Any]) -> Any:
-        """Call callTool on the MCP server."""
         return await self.rpc("callTool", {"name": name, "arguments": arguments})

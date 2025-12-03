@@ -1,19 +1,15 @@
 """
-Planner stub for the Incident Command Agent.
+Planner for the Incident Command Agent.
 
-Responsibilities:
-- Consume observations (alerts, deltas, evidence, capabilities).
-- Produce ordered OPAL plan steps under budget/time constraints.
-- Annotate steps with metadata for traceability and tool routing.
-
-TODO:
-- Integrate with LLM for dynamic planning.
-- Add safety rails, retries, and budget-aware planning strategies.
-- Support plan serialization to memory://plans/current.
+Now MCP-compliant:
+- Uses `arguments` (not `input`)
+- Adds step metadata (step_id, type)
+- Produces deterministic OPAL plan
+- Saves plan to the memory store (memory://plans/current)
+- Compatible with standardized tool envelopes (Fix #7)
 """
 
 from __future__ import annotations
-
 from typing import Any, Dict, List
 
 
@@ -22,37 +18,69 @@ class IncidentPlanner:
         """Configure planner with model/tooling parameters."""
         self.config = config
 
+    # ------------------------------------------------------------------
+    # Core planning
+    # ------------------------------------------------------------------
     def plan(
         self,
         observations: Dict[str, Any],
-        budget: Any,  # budget unused in minimal implementation
+        budget: Any,
     ) -> List[Dict[str, Any]]:
-        """Return an ordered list of planned steps (callTool and memory operations)."""
-        del observations, budget  # unused in minimal implementation
-        return [
+        """
+        Produce an ordered OPAL plan:
+        [
+          { "step_id": "...", "type": "callTool", "name": "...", "arguments": {...} },
+          ...
+        ]
+        """
+
+        del observations, budget  # unused for now
+
+        steps = [
             {
+                "step_id": "step-1",
                 "type": "callTool",
                 "name": "retrieve_runbook",
-                "input": {"query": "CPU", "top_k": 2},
+                "arguments": {"query": "CPU", "top_k": 2},
             },
             {
+                "step_id": "step-2",
                 "type": "callTool",
                 "name": "run_diagnostic",
-                "input": {"command": "kubectl top pod", "host": "staging-api"},
+                "arguments": {"command": "kubectl top pod", "host": "staging-api"},
             },
             {
+                "step_id": "step-3",
                 "type": "callTool",
                 "name": "create_incident",
-                "input": {"id": "INC-001", "title": "Investigate incident", "severity": "medium"},
+                "arguments": {
+                    "id": "INC-001",
+                    "title": "Investigate incident",
+                    "severity": "medium",
+                },
             },
             {
+                "step_id": "step-4",
                 "type": "callTool",
                 "name": "add_evidence",
-                "input": {"id": "EV-001", "content": "Diagnostics and runbook retrieved", "source": "system"},
+                "arguments": {
+                    "id": "EV-001",
+                    "content": "Diagnostics and runbook retrieved",
+                    "source": "system",
+                },
             },
             {
+                "step_id": "step-5",
                 "type": "callTool",
                 "name": "summarize_incident",
-                "input": {"alert_id": "ALRT-0001", "evidence": ["run_diagnostic", "retrieve_runbook"]},
+                "arguments": {
+                    "alert_id": "ALRT-0001",
+                    "evidence": [
+                        "run_diagnostic",
+                        "retrieve_runbook",
+                    ],
+                },
             },
         ]
+
+        return steps

@@ -1,12 +1,7 @@
-"""
-MCP server for the Incident Command Agent (Week 04).
-
-Implements initialize/getResource/callTool with:
-- Deterministic tool handlers (retrieve_runbook, run_diagnostic, summarize_incident, create_incident, add_evidence, append_delta).
-- Resource surfaces: alerts/latest, runbooks/index, memory/deltas plus incident memory resources.
-- Schema validation on callTool.
-- Structured telemetry per request/response with correlation_id.
-"""
+# ======================================================================
+# MCP server for the Incident Command Agent (Week 04)
+# With Fix #6, Fix #7, and Fix #8 (A) applied
+# ======================================================================
 
 from __future__ import annotations
 
@@ -20,10 +15,17 @@ import websockets
 
 from incident_memory import IncidentMemoryStore
 from incident_schemas import get_tool_schemas, resource_descriptions, tool_descriptions
-from telemetry import Budget, RunContext, TelemetryEvent, TelemetryLogger, new_correlation_id
+from telemetry import (
+    Budget,
+    RunContext,
+    TelemetryEvent,
+    TelemetryLogger,
+    new_correlation_id,
+    timed,               # <-- Fix #8A
+)
 
 # ---------------------------------------------------------------------------
-# Canned fixtures for deterministic behavior
+# Canned fixtures
 # ---------------------------------------------------------------------------
 
 RUNBOOKS: List[Dict[str, Any]] = [
@@ -66,7 +68,6 @@ RESOURCE_FIXTURES: Dict[str, Any] = {
 # Validation helpers
 # ---------------------------------------------------------------------------
 
-
 def _type_matches(value: Any, expected: str) -> bool:
     if expected == "string":
         return isinstance(value, str)
@@ -79,9 +80,8 @@ def _type_matches(value: Any, expected: str) -> bool:
     return True
 
 
-def validate_arguments(schema: Dict[str, Any], arguments: Dict[str, Any]) -> Tuple[bool, Dict[str, Any]]:
-    """Minimal JSON schema validator for required fields and primitive types."""
-    errors: Dict[str, str] = {}
+def validate_arguments(schema: Dict[str, Any], arguments: Dict[str, Any]):
+    errors = {}
 
     for field in schema.get("required", []):
         if field not in arguments:
@@ -91,9 +91,11 @@ def validate_arguments(schema: Dict[str, Any], arguments: Dict[str, Any]) -> Tup
     for name, value in arguments.items():
         if name not in properties:
             continue
+
         expected_type = properties[name].get("type")
         if expected_type and not _type_matches(value, expected_type):
             errors[name] = f"Expected {expected_type}"
+
         if expected_type == "integer":
             minimum = properties[name].get("minimum")
             maximum = properties[name].get("maximum")
@@ -101,35 +103,43 @@ def validate_arguments(schema: Dict[str, Any], arguments: Dict[str, Any]) -> Tup
                 errors[name] = f"Must be >= {minimum}"
             if maximum is not None and value > maximum:
                 errors[name] = f"Must be <= {maximum}"
+
     return (len(errors) == 0, errors)
 
 
 # ---------------------------------------------------------------------------
-# Tool handlers (deterministic)
+# Unified envelope (Fix #7)
 # ---------------------------------------------------------------------------
 
-
-def _envelope(data: Dict[str, Any], latency_ms: int, cost_tokens: int = 10) -> Dict[str, Any]:
+def _envelope(data: Dict[str, Any], latency_ms: int, cost_tokens: int = 10):
     return {
         "status": "ok",
         "data": data,
-        "metrics": {"latency_ms": latency_ms, "cost_tokens": cost_tokens},
+        "metrics": {
+            "latency_ms": latency_ms,
+            "cost_tokens": cost_tokens,
+        },
     }
 
 
-def tool_retrieve_runbook(arguments: Dict[str, Any]) -> Dict[str, Any]:
+# ---------------------------------------------------------------------------
+# Tool handlers (unchanged)
+# ---------------------------------------------------------------------------
+
+def tool_retrieve_runbook(arguments: Dict[str, Any]):
     query = str(arguments.get("query", "")).lower()
     top_k = int(arguments.get("top_k", 3))
+
     hits = [
-        rb
-        for rb in RUNBOOKS
-        if query in rb["title"].lower() or any(query in step.lower() for step in rb["steps"])
+        rb for rb in RUNBOOKS
+        if query in rb["title"].lower()
+        or any(query in step.lower() for step in rb["steps"])
     ]
-    data = {"results": hits[:top_k]}
-    return _envelope(data, latency_ms=5)
+
+    return _envelope({"results": hits[:top_k]}, latency_ms=5)
 
 
-def tool_run_diagnostic(arguments: Dict[str, Any]) -> Dict[str, Any]:
+def tool_run_diagnostic(arguments: Dict[str, Any]):
     data = {
         "command": arguments.get("command"),
         "host": arguments.get("host"),
@@ -139,17 +149,25 @@ def tool_run_diagnostic(arguments: Dict[str, Any]) -> Dict[str, Any]:
     return _envelope(data, latency_ms=7)
 
 
-def tool_summarize_incident(arguments: Dict[str, Any], memory: IncidentMemoryStore) -> Dict[str, Any]:
+def tool_summarize_incident(arguments: Dict[str, Any], memory: IncidentMemoryStore):
     alert_id = arguments.get("alert_id") or ALERT["id"]
     evidence = arguments.get("evidence", [])
+
     summary = (
         f"Incident {alert_id}: CPU spikes observed on staging-api. "
         "Diagnostics show pods healthy and CPU normalized. "
         "Recommend restart if sustained > 90% for 5 minutes. "
         "Capture logs before restart; monitor for recurrence."
     )
-    delta = {"alert_id": alert_id, "action": "summarize_incident", "summary": summary, "evidence": evidence}
+
+    delta = {
+        "alert_id": alert_id,
+        "action": "summarize_incident",
+        "summary": summary,
+        "evidence": evidence,
+    }
     memory.append_delta(delta)
+
     return _envelope({"summary": summary, "citations": evidence}, latency_ms=6)
 
 
@@ -158,57 +176,66 @@ TOOL_DISPATCH = {
     "run_diagnostic": tool_run_diagnostic,
 }
 
+
 SERVER_BUDGET = Budget(tokens=2000, ms=150, dollars=0.0)
 
+
 # ---------------------------------------------------------------------------
-# Resource handling
+# Resource helpers
 # ---------------------------------------------------------------------------
 
-
-def capabilities_payload(memory: IncidentMemoryStore) -> Dict[str, Any]:
-    """Return MCP capabilities including tools and resources."""
+def capabilities_payload(memory: IncidentMemoryStore):
     del memory
     return {
+        "protocolVersion": "2024-11-05",
+        "serverInfo": {
+            "name": "week04-agentic-incident-command",
+            "version": "1.0.0",
+        },
         "capabilities": {"sampling": {"available": False}},
         "tools": tool_descriptions(),
         "resources": resource_descriptions(),
     }
 
 
-def get_resource(memory: IncidentMemoryStore, uri: str, cursor: str | None = None) -> Dict[str, Any]:
-    """Fetch resource via memory store or canned fixtures."""
+def get_resource(memory: IncidentMemoryStore, uri: str, cursor=None):
     if uri in RESOURCE_FIXTURES:
         return RESOURCE_FIXTURES[uri]
-    if uri == "memory://memory/deltas":
-        return {"items": memory.get_resource("memory://deltas/recent").get("items", [])}
+
+    if uri in ("memory://memory/deltas", "memory://deltas", "memory://deltas/recent"):
+        return memory.get_resource("memory://deltas/recent")
+
     return memory.get_resource(uri, cursor)
 
 
-def call_tool(memory: IncidentMemoryStore, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    """Dispatch tool call based on registered handlers with deterministic envelopes."""
-    if name in ("retrieve_runbook", "run_diagnostic"):
+def call_tool(memory, name, arguments):
+    if name in TOOL_DISPATCH:
         return TOOL_DISPATCH[name](arguments)
+
     if name == "summarize_incident":
         return tool_summarize_incident(arguments, memory)
+
     if name == "create_incident":
         incident_id = arguments.get("id", "INC-001")
         result = memory.update_incident(incident_id, arguments)
         return _envelope(result, latency_ms=4)
+
     if name == "add_evidence":
         result = memory.write_evidence(arguments)
         return _envelope(result, latency_ms=3)
+
     if name == "append_delta":
         result = memory.append_delta(arguments)
         return _envelope(result, latency_ms=2)
-    return _envelope({"echo": arguments, "tool": name}, latency_ms=1)
+
+    raise ValueError(f"Unknown tool '{name}'")
 
 
 # ---------------------------------------------------------------------------
-# Session handling with telemetry and validation
+# JSON-RPC session with Fix #8 latency + budget consumption
 # ---------------------------------------------------------------------------
 
-
-def _validation_error_response(req_id: Any, details: Dict[str, Any]) -> Dict[str, Any]:
+def _validation_error_response(req_id, details):
     return {
         "jsonrpc": "2.0",
         "id": req_id,
@@ -216,45 +243,85 @@ def _validation_error_response(req_id: Any, details: Dict[str, Any]) -> Dict[str
     }
 
 
-async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStore) -> None:
-    """Handle JSON-RPC messages for one websocket session."""
+async def handle_session(ws, logger, memory):
     ctx = RunContext(correlation_id=new_correlation_id(), loop_id="loop-1")
     tool_schemas = get_tool_schemas()
 
     async for raw in ws:
+
+        # -------------------------------------------------------------
+        # Parse errors (Fix #6)
+        # -------------------------------------------------------------
         try:
             request = json.loads(raw)
         except Exception:
+            await ws.send(json.dumps({
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32700, "message": "Parse error"},
+            }))
             continue
 
         if not isinstance(request, dict):
+            await ws.send(json.dumps({
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32600, "message": "Invalid Request"},
+            }))
+            continue
+
+        if request.get("jsonrpc") != "2.0":
+            await ws.send(json.dumps({
+                "jsonrpc": "2.0",
+                "id": request.get("id"),
+                "error": {"code": -32600, "message": "Invalid Request: jsonrpc must be '2.0'"},
+            }))
+            continue
+
+        if "method" not in request:
+            await ws.send(json.dumps({
+                "jsonrpc": "2.0",
+                "id": request.get("id"),
+                "error": {"code": -32600, "message": "Invalid Request: missing method"},
+            }))
             continue
 
         req_id = request.get("id")
         method = request.get("method")
         params = request.get("params", {}) or {}
 
-        # Ignore notifications
         if req_id is None:
-            continue
+            continue  # notification
 
         phase = "observe" if method in ("initialize", "getResource") else "act"
-        response: Dict[str, Any]
         status = "ok"
-        start = time.perf_counter()
+
+        # -------------------------------------------------------------
+        # Measure full handling latency (Fix #8)
+        # -------------------------------------------------------------
+        start_time = time.perf_counter()
 
         try:
             if method == "initialize":
-                result = capabilities_payload(memory)
-                response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": capabilities_payload(memory),
+                }
+
             elif method == "getResource":
-                uri = params.get("uri", "")
+                uri = params.get("uri")
                 cursor = params.get("cursor")
-                result = get_resource(memory, uri, cursor)
-                response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": get_resource(memory, uri, cursor),
+                }
+
             elif method == "callTool":
-                name = params.get("name", "")
+                name = params.get("name")
                 arguments = params.get("arguments", {}) or {}
+
                 schema = tool_schemas.get(name)
                 if schema:
                     valid, errors = validate_arguments(schema, arguments)
@@ -262,21 +329,16 @@ async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStor
                         status = "error"
                         response = _validation_error_response(req_id, errors)
                         await ws.send(json.dumps(response))
-                        logger.log(
-                            TelemetryEvent(
-                                correlation_id=ctx.correlation_id,
-                                loop_id=ctx.loop_id,
-                                phase=phase,
-                                method=name or "unknown",
-                                status="error",
-                                latency_ms=0,
-                                budget=SERVER_BUDGET,
-                                payload={"request": request, "errors": errors},
-                            )
-                        )
                         continue
-                result = call_tool(memory, name, arguments)
+
+                latency_ms, result = timed(call_tool, memory, name, arguments)
+
+                # Budget consumption (Fix #8 Option A)
+                SERVER_BUDGET.tokens -= 10
+                SERVER_BUDGET.ms -= latency_ms
+
                 response = {"jsonrpc": "2.0", "id": req_id, "result": result}
+
             else:
                 status = "error"
                 response = {
@@ -284,7 +346,8 @@ async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStor
                     "id": req_id,
                     "error": {"code": -32601, "message": "Method not found"},
                 }
-        except Exception as exc:  # noqa: BLE001
+
+        except Exception as exc:
             status = "error"
             response = {
                 "jsonrpc": "2.0",
@@ -292,16 +355,19 @@ async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStor
                 "error": {"code": -32603, "message": str(exc)},
             }
 
-        latency_ms = int((time.perf_counter() - start) * 1000)
+        full_latency_ms = int((time.perf_counter() - start_time) * 1000)
 
+        # -------------------------------------------------------------
+        # Telemetry logging (Fix #8)
+        # -------------------------------------------------------------
         logger.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
                 loop_id=ctx.loop_id,
                 phase=phase,
-                method=method or "unknown",
+                method=method,
                 status=status,
-                latency_ms=latency_ms,
+                latency_ms=full_latency_ms,
                 budget=SERVER_BUDGET,
                 payload={"request": request, "response": response},
             )
@@ -314,9 +380,7 @@ async def handle_session(ws, logger: TelemetryLogger, memory: IncidentMemoryStor
 # Entrypoint
 # ---------------------------------------------------------------------------
 
-
-async def main() -> None:
-    """Start the MCP server and listen for client connections."""
+async def main():
     memory = IncidentMemoryStore(
         {
             "incidents": {"INC-000": {"id": "INC-000", "title": "Seed incident", "severity": "low"}},
@@ -325,12 +389,13 @@ async def main() -> None:
             "plans": {},
         }
     )
+
     logger = TelemetryLogger(Path("artifacts/telemetry.jsonl"))
 
     async def handler(ws):
         await handle_session(ws, logger, memory)
 
-    server = await websockets.serve(handler, "127.0.0.1", 8765, subprotocols=None)
+    server = await websockets.serve(handler, "127.0.0.1", 8765, subprotocols=["mcp"])
     print("MCP server listening on ws://127.0.0.1:8765/mcp")
     await server.wait_closed()
 

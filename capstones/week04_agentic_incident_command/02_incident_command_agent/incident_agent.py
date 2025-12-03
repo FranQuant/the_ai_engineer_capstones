@@ -1,5 +1,10 @@
 """
 Incident Command OPAL orchestrator with guardrails and telemetry.
+
+Aligned with:
+- Planner steps using `arguments` instead of `input`
+- Standardized envelopes: {"status", "data", "metrics"}
+- Basic observation of key memory surfaces
 """
 
 from __future__ import annotations
@@ -37,6 +42,9 @@ class IncidentAgent:
             "append_delta": self._local_append_delta,
         }
 
+    # ------------------------------------------------------------------
+    # OPAL: Observe
+    # ------------------------------------------------------------------
     async def observe(self, ctx: RunContext) -> Dict[str, Any]:
         """Collect capabilities and resources needed for planning."""
         self.telemetry.log(
@@ -51,7 +59,26 @@ class IncidentAgent:
                 payload={},
             )
         )
-        resources = {"resources": self.memory.list_resources()}
+
+        observations: Dict[str, Any] = {
+            "resources": self.memory.list_resources(),
+        }
+
+        try:
+            observations["alerts_latest"] = self.memory.get_resource("memory://alerts/latest")
+        except Exception:
+            observations["alerts_latest"] = None
+
+        try:
+            observations["runbooks_index"] = self.memory.get_resource("memory://runbooks/index")
+        except Exception:
+            observations["runbooks_index"] = None
+
+        try:
+            observations["deltas_recent"] = self.memory.get_resource("memory://deltas/recent")
+        except Exception:
+            observations["deltas_recent"] = None
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -61,11 +88,14 @@ class IncidentAgent:
                 status="ok",
                 latency_ms=0,
                 budget=self.budget,
-                payload=resources,
+                payload=observations,
             )
         )
-        return resources
+        return observations
 
+    # ------------------------------------------------------------------
+    # OPAL: Plan
+    # ------------------------------------------------------------------
     async def plan(self, ctx: RunContext, observations: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Produce an ordered plan (callTool and memory operations) under budget constraints."""
         self.telemetry.log(
@@ -80,7 +110,9 @@ class IncidentAgent:
                 payload={"observations": observations},
             )
         )
+
         plan = self.planner.plan(observations, self.budget)
+
         if len(plan) > self.max_steps:
             self.telemetry.log(
                 TelemetryEvent(
@@ -95,6 +127,7 @@ class IncidentAgent:
                 )
             )
             plan = plan[: self.max_steps]
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -109,8 +142,11 @@ class IncidentAgent:
         )
         return plan
 
+    # ------------------------------------------------------------------
+    # OPAL: Act
+    # ------------------------------------------------------------------
     async def act(self, ctx: RunContext, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Execute planned steps via MCP tools and record results."""
+        """Execute planned steps via local tools and record results."""
         results: List[Dict[str, Any]] = []
         cumulative_latency = 0
         failure_count = 0
@@ -143,20 +179,26 @@ class IncidentAgent:
                     )
                 )
                 break
+
             if step.get("type") == "callTool":
                 name = step.get("name", "")
-                arguments = step.get("input", {}) or {}
+                arguments = step.get("arguments", {}) or {}
+
                 tool_fn = self.LOCAL_TOOLS.get(name)
                 if not tool_fn:
-                    result = {"status": "error", "error": f"Unknown local tool: {name}"}
+                    result = {"status": "error", "data": {"error": f"Unknown local tool: {name}"}, "metrics": {"latency_ms": 0}}
                 else:
                     result = tool_fn(arguments)
+
                 results.append({"step": step, "result": result})
+
                 metrics = result.get("metrics", {}) if isinstance(result, dict) else {}
                 latency_ms = int(metrics.get("latency_ms", 0) or 0)
                 cumulative_latency += latency_ms
+
                 if result.get("status") != "ok":
                     failure_count += 1
+
                 if cumulative_latency > self.max_latency_ms:
                     self.telemetry.log(
                         TelemetryEvent(
@@ -167,10 +209,14 @@ class IncidentAgent:
                             status="error",
                             latency_ms=latency_ms,
                             budget=self.budget,
-                            payload={"reason": "latency_budget_exceeded", "cumulative_ms": cumulative_latency},
+                            payload={
+                                "reason": "latency_budget_exceeded",
+                                "cumulative_ms": cumulative_latency,
+                            },
                         )
                     )
                     break
+
                 if failure_count > self.max_retries:
                     self.telemetry.log(
                         TelemetryEvent(
@@ -181,12 +227,16 @@ class IncidentAgent:
                             status="error",
                             latency_ms=latency_ms,
                             budget=self.budget,
-                            payload={"reason": "max_retries_exceeded", "failures": failure_count},
+                            payload={
+                                "reason": "max_retries_exceeded",
+                                "failures": failure_count,
+                            },
                         )
                     )
                     break
+
             else:
-                results.append({"step": step, "result": {"ok": True}})
+                results.append({"step": step, "result": {"status": "ok", "data": {}, "metrics": {"latency_ms": 0}}})
 
         self.telemetry.log(
             TelemetryEvent(
@@ -202,6 +252,9 @@ class IncidentAgent:
         )
         return results
 
+    # ------------------------------------------------------------------
+    # OPAL: Learn
+    # ------------------------------------------------------------------
     async def learn(
         self,
         ctx: RunContext,
@@ -209,6 +262,8 @@ class IncidentAgent:
         results: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         """Write deltas, summaries, and updated state back to memory."""
+        del observations
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -221,11 +276,28 @@ class IncidentAgent:
                 payload={},
             )
         )
+
+        # Structured deltas
         for item in results:
-            delta = {"action": "completed_step", "details": item}
+            step = item.get("step", {})
+            result = item.get("result", {})
+            delta = {
+                "action": "completed_step",
+                "step_name": step.get("name"),
+                "step_id": step.get("step_id"),
+                "status": result.get("status"),
+            }
             self.memory.write_delta(delta)
-        self.memory.write_plan([item.get("step", {}) for item in results])
+
+        # -----------------------------------------------------------
+        # Fix #9-B: Write plan with correct MCP schema
+        # -----------------------------------------------------------
+        executed_plan = [item.get("step", {}) for item in results]
+        self.memory.write_plan({"plan": executed_plan})
+        # -----------------------------------------------------------
+
         learn_result = {"deltas_written": len(results)}
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -240,8 +312,10 @@ class IncidentAgent:
         )
         return learn_result
 
+    # ------------------------------------------------------------------
+    # OPAL: Full loop
+    # ------------------------------------------------------------------
     async def run_loop(self, ctx: RunContext) -> Dict[str, Any]:
-        """Run a single OPAL loop and return loop outputs."""
         observations = await self.observe(ctx)
         plan_steps = await self.plan(ctx, observations)
         results = await self.act(ctx, plan_steps)
@@ -254,27 +328,34 @@ class IncidentAgent:
         }
 
     # ------------------------------------------------------------------
-    # Local deterministic tool implementations (no MCP RPC)
+    # Local deterministic tools
     # ------------------------------------------------------------------
 
     def _local_retrieve_runbook(self, args: Dict[str, Any]) -> Dict[str, Any]:
         query = str(args.get("query", "")).lower()
         top_k = int(args.get("top_k", 1))
         runbooks = self.memory.get_resource("memory://runbooks/index")
+
         matches = [
-            rb for rb in runbooks
+            rb
+            for rb in runbooks
             if isinstance(rb, dict) and query in rb.get("title", "").lower()
         ]
+
         return {
             "status": "ok",
-            "result": matches[:top_k],
+            "data": {"results": matches[:top_k]},
             "metrics": {"latency_ms": 1},
         }
 
     def _local_run_diagnostic(self, args: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "status": "ok",
-            "result": {"output": "simulated diagnostics"},
+            "data": {
+                "output": "simulated diagnostics",
+                "command": args.get("command"),
+                "host": args.get("host"),
+            },
             "metrics": {"latency_ms": 1},
         }
 
@@ -282,16 +363,20 @@ class IncidentAgent:
         summary = "Summary generated from memory."
         return {
             "status": "ok",
-            "result": summary,
+            "data": {"summary": summary, "args": args},
             "metrics": {"latency_ms": 1},
         }
 
     def _local_create_incident(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        incident = {"id": args.get("id", "INC-LOCAL"), "title": args.get("title", "")}
+        incident = {
+            "id": args.get("id", "INC-LOCAL"),
+            "title": args.get("title", ""),
+            "severity": args.get("severity", "medium"),
+        }
         self.memory.update_incident(incident["id"], incident)
         return {
             "status": "ok",
-            "result": incident,
+            "data": incident,
             "metrics": {"latency_ms": 1},
         }
 
@@ -304,7 +389,7 @@ class IncidentAgent:
         self.memory.write_evidence(evidence)
         return {
             "status": "ok",
-            "result": evidence,
+            "data": evidence,
             "metrics": {"latency_ms": 1},
         }
 
@@ -312,6 +397,6 @@ class IncidentAgent:
         self.memory.write_delta(args)
         return {
             "status": "ok",
-            "result": args,
+            "data": args,
             "metrics": {"latency_ms": 1},
         }
