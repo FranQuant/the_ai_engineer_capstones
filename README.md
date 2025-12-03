@@ -69,7 +69,7 @@ the_ai_engineer
 │       └── README_week04_capstone.md
 ├── README.md
 └── requirements.txt
-
+```
 ---
 
 ## Environment & Reproducibility
