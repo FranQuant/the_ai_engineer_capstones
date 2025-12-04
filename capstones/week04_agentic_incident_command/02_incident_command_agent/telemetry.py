@@ -73,14 +73,13 @@ class TelemetryLogger:
 
     def log(self, event: TelemetryEvent) -> None:
         """
-        Record telemetry event **and consume budget**.
+        Record telemetry event and consume budget.
 
         Fix #8:
         - tokens: 1 token per event
         - ms: use event.latency_ms
         - dollars: unchanged (0.0)
         """
-        # Consume from the budget
         event.budget.consume(
             latency_ms=event.latency_ms,
             tokens_used=1,
@@ -92,19 +91,19 @@ class TelemetryLogger:
         record["timestamp"] = time.time()
         line = json.dumps(record)
 
-        # Console echo
+        # Echo to console
         print(line)
 
         # Ensure directory exists
         self.sink.parent.mkdir(parents=True, exist_ok=True)
 
-        # Append JSONL
+        # Append to JSONL file
         with self.sink.open("a", encoding="utf-8") as fp:
             fp.write(line + "\n")
 
 
 # ---------------------------------------------------------------------------
-# Helper for local timing (unchanged)
+# Helper for local timing
 # ---------------------------------------------------------------------------
 
 def timed(fn, *args, **kwargs) -> Tuple[int, Any]:

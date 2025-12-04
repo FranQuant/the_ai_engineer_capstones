@@ -158,3 +158,16 @@ python 02_incident_command_agent/cli.py --replay artifacts/telemetry.jsonl
 - Guardrail events: `plan_guardrail`, `act_guardrail`
 
 ---
+
+### 6. Run Screenshots
+
+#### A. MCP Server Startup
+<img src="../../assets/MCP Server startup.png" width="650">
+
+#### B. Remote OPAL Loop Execution
+<img src="../../assets/Remote OPAL Loop.png" width="650">
+
+#### C. Telemetry JSONL Confirmation
+<img src="../../assets/Telemetry JSONL confirmation.png" width="650">
+
+---

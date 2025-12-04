@@ -127,20 +127,26 @@ def get_resource_schemas() -> Dict[str, Dict[str, object]]:
         },
         "memory://memory/deltas": {
             "type": "object",
-            "properties": {"items": {"type": "array"}},
+            "properties": {
+                "items": {"type": "array"},
+            },
             "required": ["items"],
         },
     }
 
 
 def tool_descriptions() -> List[Dict[str, object]]:
-    """Return tool descriptors combining name, description, and schema."""
+    """
+    Return tool descriptors combining name, description, and schema.
+
+    Fix: Use 'schema' instead of deprecated 'inputSchema'.
+    """
     schemas = get_tool_schemas()
     return [
         {
             "name": name,
             "description": f"Stub tool for {name.replace('_', ' ')}",
-            "inputSchema": schema,
+            "schema": schema,        # <-- FIX APPLIED
         }
         for name, schema in schemas.items()
     ]

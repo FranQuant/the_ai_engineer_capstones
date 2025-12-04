@@ -19,6 +19,9 @@ class RemoteIncidentAgent:
         self.max_latency_ms = 150
         self.max_retries = 2
 
+    # ------------------------------------------------------------------
+    # OPAL: Observe
+    # ------------------------------------------------------------------
     async def observe(self, ctx: RunContext) -> Dict[str, Any]:
         """Fetch capabilities/resources from the MCP server."""
         self.telemetry.log(
@@ -33,7 +36,9 @@ class RemoteIncidentAgent:
                 payload={},
             )
         )
+
         result = await self.client.initialize()
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -46,8 +51,12 @@ class RemoteIncidentAgent:
                 payload={"capabilities": result},
             )
         )
+
         return result
 
+    # ------------------------------------------------------------------
+    # OPAL: Plan
+    # ------------------------------------------------------------------
     async def plan(self, ctx: RunContext, observations: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Run planner locally under budget constraints."""
         self.telemetry.log(
@@ -62,7 +71,9 @@ class RemoteIncidentAgent:
                 payload={"observations": observations},
             )
         )
+
         plan = self.planner.plan(observations, self.budget)
+
         if len(plan) > self.max_steps:
             self.telemetry.log(
                 TelemetryEvent(
@@ -77,6 +88,7 @@ class RemoteIncidentAgent:
                 )
             )
             plan = plan[: self.max_steps]
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -89,8 +101,12 @@ class RemoteIncidentAgent:
                 payload={"plan": plan},
             )
         )
+
         return plan
 
+    # ------------------------------------------------------------------
+    # OPAL: Act
+    # ------------------------------------------------------------------
     async def act(self, ctx: RunContext, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Execute callTool steps via MCP client with guardrails."""
         results: List[Dict[str, Any]] = []
@@ -111,6 +127,8 @@ class RemoteIncidentAgent:
         )
 
         for step in steps:
+
+            # Guardrail: max steps
             if len(results) >= self.max_steps:
                 self.telemetry.log(
                     TelemetryEvent(
@@ -125,21 +143,30 @@ class RemoteIncidentAgent:
                     )
                 )
                 break
+
             if step.get("type") == "callTool":
+
                 name = step.get("name", "")
-                arguments = step.get("input", {}) or {}
+                arguments = step.get("arguments", {}) or {}   # <-- FIXED
+
                 try:
                     result = await self.client.call_tool(name, arguments)
                     status = result.get("status") if isinstance(result, dict) else "ok"
-                except Exception as exc:  # noqa: BLE001
-                    result = {"status": "error", "error": str(exc), "metrics": {"latency_ms": 0}}
+                except Exception as exc:
+                    result = {
+                        "status": "error",
+                        "error": str(exc),
+                        "metrics": {"latency_ms": 0},
+                    }
                     status = "error"
+
                 results.append({"step": step, "result": result})
+
                 metrics = result.get("metrics", {}) if isinstance(result, dict) else {}
                 latency_ms = int(metrics.get("latency_ms", 0) or 0)
                 cumulative_latency += latency_ms
-                if status != "ok":
-                    failure_count += 1
+
+                # Guardrail: latency budget
                 if cumulative_latency > self.max_latency_ms:
                     self.telemetry.log(
                         TelemetryEvent(
@@ -150,10 +177,18 @@ class RemoteIncidentAgent:
                             status="error",
                             latency_ms=latency_ms,
                             budget=self.budget,
-                            payload={"reason": "latency_budget_exceeded", "cumulative_ms": cumulative_latency},
+                            payload={
+                                "reason": "latency_budget_exceeded",
+                                "cumulative_ms": cumulative_latency,
+                            },
                         )
                     )
                     break
+
+                # Guardrail: retries
+                if status != "ok":
+                    failure_count += 1
+
                 if failure_count > self.max_retries:
                     self.telemetry.log(
                         TelemetryEvent(
@@ -164,12 +199,20 @@ class RemoteIncidentAgent:
                             status="error",
                             latency_ms=latency_ms,
                             budget=self.budget,
-                            payload={"reason": "max_retries_exceeded", "failures": failure_count},
+                            payload={
+                                "reason": "max_retries_exceeded",
+                                "failures": failure_count,
+                            },
                         )
                     )
                     break
+
             else:
-                results.append({"step": step, "result": {"ok": True}})
+                # Non-callTool step (rare for remote agent)
+                results.append({
+                    "step": step,
+                    "result": {"status": "ok", "data": {}, "metrics": {"latency_ms": 0}},
+                })
 
         self.telemetry.log(
             TelemetryEvent(
@@ -183,10 +226,14 @@ class RemoteIncidentAgent:
                 payload={"results": results, "cumulative_latency_ms": cumulative_latency},
             )
         )
+
         return results
 
+    # ------------------------------------------------------------------
+    # OPAL: Learn
+    # ------------------------------------------------------------------
     async def learn(self, ctx: RunContext) -> Dict[str, Any]:
-        """Fetch recent deltas and current plan from memory resources."""
+        """Fetch recent deltas and current plan from server memory resources."""
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -199,9 +246,12 @@ class RemoteIncidentAgent:
                 payload={},
             )
         )
+
         deltas = await self.client.get_resource("memory://deltas/recent")
         plan = await self.client.get_resource("memory://plans/current")
+
         learn_result = {"deltas": deltas, "plan": plan}
+
         self.telemetry.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
@@ -214,15 +264,20 @@ class RemoteIncidentAgent:
                 payload=learn_result,
             )
         )
+
         return learn_result
 
+    # ------------------------------------------------------------------
+    # Full OPAL loop
+    # ------------------------------------------------------------------
     async def run_loop(self, ctx: RunContext) -> Dict[str, Any]:
-        """Run a full OPAL loop through the MCP client."""
         self.client.set_context(ctx)
+
         observations = await self.observe(ctx)
         plan_steps = await self.plan(ctx, observations)
         results = await self.act(ctx, plan_steps)
         learn_result = await self.learn(ctx)
+
         return {
             "observations": observations,
             "plan": plan_steps,

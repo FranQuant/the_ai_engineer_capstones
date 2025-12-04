@@ -1,22 +1,19 @@
 <table width="100%">
 <tr>
 <td style="vertical-align: top;">
-
 <h1>MCP Tool Harness (Warm-Up)</h1>
-
 <p>
 This module provides a minimal MCP server and client used to explore the core
 mechanics of the OPAL loop (Observe → Plan → Act → Learn) before building the
-full Incident Command Agent in `02_incident_command_agent/`.    
-
+full Incident Command Agent in `02_incident_command_agent/`.
 </p>
-
 </td>
 <td align="right" width="200">
 <img src="../../assets/tae_logo.png" alt="TAE Banner" width="160">
 </td>
 </tr>
 </table>
+
 
 
 ## Components

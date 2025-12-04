@@ -290,10 +290,10 @@ class IncidentAgent:
             self.memory.write_delta(delta)
 
         # -----------------------------------------------------------
-        # Fix #9-B: Write plan with correct MCP schema
+        # FIX APPLIED: write_plan expects a LIST, not {"plan": list}
         # -----------------------------------------------------------
         executed_plan = [item.get("step", {}) for item in results]
-        self.memory.write_plan({"plan": executed_plan})
+        self.memory.write_plan(executed_plan)
         # -----------------------------------------------------------
 
         learn_result = {"deltas_written": len(results)}
@@ -342,9 +342,12 @@ class IncidentAgent:
             if isinstance(rb, dict) and query in rb.get("title", "").lower()
         ]
 
+        # -----------------------------------------------------------
+        # FIX APPLIED: MCP envelope must be flat: {"data": [...]} 
+        # -----------------------------------------------------------
         return {
             "status": "ok",
-            "data": {"results": matches[:top_k]},
+            "data": matches[:top_k],
             "metrics": {"latency_ms": 1},
         }
 
