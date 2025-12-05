@@ -1,59 +1,38 @@
 # -----------------------------
-
 # Core Scientific Stack
-
 # -----------------------------
-
 numpy>=1.26
 matplotlib>=3.8
 scikit-learn>=1.4
 seaborn>=0.13
 
 # -----------------------------
-
 # Jupyter / Notebook Support
-
 # -----------------------------
-
 jupyterlab>=4.0
 ipykernel>=6.0
 ipywidgets>=8.0
 
 # -----------------------------
-
-# Tiny Transformer (Week 3)
-
-# -----------------------------
-
-tokenizers>=0.15
-sentencepiece>=0.1.99
-
-# -----------------------------
-
 # Agent Demo (Week 4)
-
 # -----------------------------
-
-pydantic>=2.4
-rich>=13.7
 websockets>=12.0
 
 # -----------------------------
-
 # Optional: Testing
-
 # -----------------------------
-
 pytest>=7.4
 
 # -----------------------------
-
-# NOTE: PyTorch must be installed manually.
-
-# DO NOT pin it here.
-
-# Apple Silicon example:
-
-# pip install torch==2.3.1 --extra-index-url [https://download.pytorch.org/whl/cpu](https://download.pytorch.org/whl/cpu)
-
+# NOTE ABOUT PYTORCH
+# -----------------------------
+# PyTorch must be installed manually depending on your hardware.
+#
+# Example for Apple Silicon:
+# pip install torch==2.3.1 --extra-index-url https://download.pytorch.org/whl/cpu
+#
+# Example for Linux CUDA:
+# pip install torch --index-url https://download.pytorch.org/whl/cu118
+#
+# This avoids installing an incorrect wheel for the user's system.
 # -----------------------------

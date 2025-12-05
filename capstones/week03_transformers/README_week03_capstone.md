@@ -32,7 +32,7 @@ This capstone implements a complete minimal GPT-style language model:
 - **Dropout hooks** (set to 0.0 but present architecturally)  
 - **Mini GPT decoder-only model (`MiniTransformerLM`)**  
 - **Training loop with LR warmup + cosine decay**  
-- **Saved checkpoint (`mini_gpt.pt`)**  
+- **Saved checkpoint `mini_gpt.pt`(generated after training; not included in repository)**  
 - **Diagnostics notebook for attention maps, embeddings, entropy, sampling, etc.**
 
 Everything is implemented **from scratch** without helper libraries.
