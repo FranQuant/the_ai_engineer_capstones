@@ -56,7 +56,6 @@ the_ai_engineer
     │   │   └── README_week02_capstone.md
     │   ├── week03_transformers                   # Tiny Transformer capstone
     │   │   ├── mini_gpt_diagnostics.ipynb
-    │   │   ├── mini_gpt.pt
     │   │   ├── mini_transformer.py
     │   │   ├── multihead_attention.py
     │   │   ├── README_week03_capstone.md

@@ -51,7 +51,6 @@ week03_transformers/
 ├── transformer_block.py                 # Step 3: Transformer Block (pre-LN)
 ├── mini_transformer.py                  # Step 4: Mini GPT-style LM
 ├── train_mini_gpt.py                    # Step 5: End-to-end training script
-├── mini_gpt.pt                          # Saved checkpoint
 ├── mini_gpt_diagnostics.ipynb           # Step 6: Interpretability suite
 │
 └── README_week03_capstone.md            # ← This file
