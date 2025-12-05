@@ -290,7 +290,7 @@ class IncidentAgent:
             self.memory.write_delta(delta)
 
         # -----------------------------------------------------------
-        # FIX APPLIED: write_plan expects a LIST, not {"plan": list}
+        # write_plan 
         # -----------------------------------------------------------
         executed_plan = [item.get("step", {}) for item in results]
         self.memory.write_plan(executed_plan)
@@ -343,7 +343,7 @@ class IncidentAgent:
         ]
 
         # -----------------------------------------------------------
-        # FIX APPLIED: MCP envelope must be flat: {"data": [...]} 
+        # MCP envelope 
         # -----------------------------------------------------------
         return {
             "status": "ok",

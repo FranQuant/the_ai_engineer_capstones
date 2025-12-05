@@ -1,11 +1,10 @@
 """
 Training script for the Week-03 Tiny Transformer (decoder-only GPT-style LM).
 
-This is a polished, production-clean version of your original:
+
 - Explicit structure (config → data → model → training → sampling)
 - Optional causal mask use (LM already enforces default causality)
 - Deterministic seeding (torch + random + numpy)
-- Same functionality and behavior as your original script
 - Fully aligned with the Week-03 Capstone spec
 
 Note:

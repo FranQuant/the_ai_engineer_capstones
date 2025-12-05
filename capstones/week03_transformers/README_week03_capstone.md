@@ -143,7 +143,7 @@ The notebook `mini_gpt_diagnostics.ipynb` includes:
 - Logits histogram + entropy
 - Temperature, greedy, and top-k sampling
 
-**Note:** The diagnostics notebook rebuilds the tokenizer using the **exact same corpus** as `train_mini_gpt.py`. Any mismatch will break token-level visualizations.
+**Note:** The diagnostics notebook rebuilds the tokenizer using the **exact same corpus** as `train_mini_gpt.py`. 
 
 ---
 

@@ -1,10 +1,10 @@
 """
-Step 2 (final): Multi-Head Self-Attention (MHA) with proper mask semantics.
+Step 2: Multi-Head Self-Attention (MHA) with proper mask semantics.
 
 Grounding:
 - Handout Sections 5–7: self-attention, multi-head shapes, masking rules.
 - Reference: llmcode code/ch08_transformer.py and Week-3 handout patterns.
-- Mask semantics (boolean mask: True=keep, False=mask) now match MiniTransformerLM.
+- Mask semantics (boolean mask: True=keep, False=mask) match MiniTransformerLM.
 
 This module:
     - Splits Q/K/V into heads

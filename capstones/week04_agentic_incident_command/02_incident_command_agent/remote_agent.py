@@ -208,7 +208,7 @@ class RemoteIncidentAgent:
                     break
 
             else:
-                # Non-callTool step (rare for remote agent)
+                # Non-callTool step 
                 results.append({
                     "step": step,
                     "result": {"status": "ok", "data": {}, "metrics": {"latency_ms": 0}},

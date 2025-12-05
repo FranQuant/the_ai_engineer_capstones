@@ -143,8 +143,6 @@ It prepares the foundation for future Capstones involving:
 
 ## Dependencies (Minimal)
 
-For consistency with the rest of the repository, full environment specs are kept in the **root** `requirements.txt`.
-
 Minimal packages used in Week 02:
 
 ```text

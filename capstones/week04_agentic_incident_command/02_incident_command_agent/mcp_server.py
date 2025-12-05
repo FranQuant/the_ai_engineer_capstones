@@ -1,6 +1,5 @@
 # ======================================================================
 # MCP server for the Incident Command Agent (Week 04)
-# With Fix #5A, Fix #6, Fix #7, and Fix #8(A) applied
 # ======================================================================
 
 from __future__ import annotations
@@ -21,7 +20,7 @@ from telemetry import (
     TelemetryEvent,
     TelemetryLogger,
     new_correlation_id,
-    timed,               # <-- Fix #8A
+    timed,               
 )
 
 # ---------------------------------------------------------------------------
@@ -108,7 +107,7 @@ def validate_arguments(schema: Dict[str, Any], arguments: Dict[str, Any]):
 
 
 # ---------------------------------------------------------------------------
-# Unified envelope (Fix #7)
+# Unified envelope 
 # ---------------------------------------------------------------------------
 
 def _envelope(data: Dict[str, Any], latency_ms: int, cost_tokens: int = 10):
@@ -123,7 +122,7 @@ def _envelope(data: Dict[str, Any], latency_ms: int, cost_tokens: int = 10):
 
 
 # ---------------------------------------------------------------------------
-# Tool handlers (existing + Fix #5A)
+# Tool handlers 
 # ---------------------------------------------------------------------------
 
 def tool_retrieve_runbook(arguments: Dict[str, Any]):
@@ -171,7 +170,7 @@ def tool_summarize_incident(arguments: Dict[str, Any], memory: IncidentMemorySto
     return _envelope({"summary": summary, "citations": evidence}, latency_ms=6)
 
 
-# 👉 NEW: Fix #5A – Write OPAL plan into memory://plans/current
+# Write OPAL plan into memory://plans/current
 def tool_write_plan(arguments: Dict[str, Any], memory: IncidentMemoryStore):
     plan = arguments.get("plan", [])
     memory.write_plan(plan)
@@ -179,7 +178,7 @@ def tool_write_plan(arguments: Dict[str, Any], memory: IncidentMemoryStore):
 
 
 # ---------------------------------------------------------------------------
-# TOOL_DISPATCH with Fix #5A
+# TOOL_DISPATCH 
 # ---------------------------------------------------------------------------
 
 TOOL_DISPATCH = {
@@ -225,7 +224,7 @@ def get_resource(memory: IncidentMemoryStore, uri: str, cursor=None):
 
 
 def call_tool(memory, name, arguments):
-    # Fix #5A – route correctly to new write_plan tool
+    
     if name == "write_plan":
         return tool_write_plan(arguments, memory)
 
@@ -253,7 +252,7 @@ def call_tool(memory, name, arguments):
 
 
 # ---------------------------------------------------------------------------
-# JSON-RPC session — unchanged except latency + budget (Fix #8)
+# JSON-RPC session — latency + budget 
 # ---------------------------------------------------------------------------
 
 def _validation_error_response(req_id, details):

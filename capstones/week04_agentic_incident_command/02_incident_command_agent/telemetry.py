@@ -24,7 +24,7 @@ def new_correlation_id() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Budget with consumption support (Fix #8)
+# Budget with consumption support 
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -63,7 +63,7 @@ class TelemetryEvent:
 
 
 # ---------------------------------------------------------------------------
-# Logger that applies budget consumption (Fix #8)
+# Logger that applies budget consumption 
 # ---------------------------------------------------------------------------
 
 class TelemetryLogger:

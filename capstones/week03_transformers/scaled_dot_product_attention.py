@@ -1,5 +1,5 @@
 """
-Step 1 (Corrected for MHA): Scaled dot-product attention with optional causal mask
+Step 1: Scaled dot-product attention with optional causal mask
 and tests aligned exactly with the Week-03 handout.
 
 Grounding:

@@ -17,7 +17,7 @@ from telemetry import Budget, RunContext, TelemetryEvent, TelemetryLogger
 
 
 # ---------------------------------------------------------------------------
-# Helper functions for MCP envelopes (Fix #7B)
+# Helper functions for MCP envelopes 
 # ---------------------------------------------------------------------------
 
 def _unwrap_mcp_result(result: Dict[str, Any]) -> Any:
@@ -29,7 +29,7 @@ def _unwrap_mcp_result(result: Dict[str, Any]) -> Any:
     - Otherwise, PRESERVE the full envelope (status, data, metrics).
     """
 
-    # New MCP content[] shape
+    # MCP content[] shape
     if isinstance(result, dict) and "content" in result:
         content = result.get("content") or []
         if isinstance(content, list) and content:
@@ -41,7 +41,6 @@ def _unwrap_mcp_result(result: Dict[str, Any]) -> Any:
         # If content[] exists but can't be interpreted, return envelope intact
         return result
 
-    # Legacy envelopes: DO NOT unwrap `data` anymore
     # (This preserves status + metrics needed for guardrails)
     return result
 
