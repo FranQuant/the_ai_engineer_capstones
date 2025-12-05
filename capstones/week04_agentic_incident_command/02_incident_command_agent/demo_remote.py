@@ -6,12 +6,12 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any, Dict
+from pathlib import Path
 
 from incident_planner import IncidentPlanner
 from mcp_client import MCPClient
 from remote_agent import RemoteIncidentAgent
 from telemetry import RunContext, TelemetryLogger, new_correlation_id
-from pathlib import Path
 
 
 async def main() -> None:
@@ -24,7 +24,17 @@ async def main() -> None:
     agent = RemoteIncidentAgent(client, planner, telemetry)
     ctx = RunContext(correlation_id=new_correlation_id(), loop_id="loop-1")
 
+    # ------------------------------------------------------------
+    # Run a full OPAL loop
+    # ------------------------------------------------------------
     summary: Dict[str, Any] = await agent.run_loop(ctx)
+
+    # ------------------------------------------------------------
+    # Fix #5B — write the OPAL plan into MCP memory via write_plan
+    # ------------------------------------------------------------
+    if "plan" in summary and summary["plan"]:
+        await client.call_tool("write_plan", {"plan": summary["plan"]})
+
     print("=== Remote OPAL Summary ===")
     print(summary)
 

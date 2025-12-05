@@ -23,33 +23,28 @@ from telemetry import Budget, RunContext, TelemetryEvent, TelemetryLogger
 def _unwrap_mcp_result(result: Dict[str, Any]) -> Any:
     """
     MCP-compliant result parser.
-    We expect:
-        result = {
-            "content": [{"type": "text", "text": "..."}],
-            "mimeType": "application/json"
-        }
-    But we fall back safely if server returns legacy shapes.
+
+    Correct behavior:
+    - If the server returns MCP `content[]` blocks, unwrap them.
+    - Otherwise, PRESERVE the full envelope (status, data, metrics).
     """
 
-    # New MCP shape
+    # New MCP content[] shape
     if isinstance(result, dict) and "content" in result:
         content = result.get("content") or []
         if isinstance(content, list) and content:
             item = content[0]
-            # text blocks
             if item.get("type") == "text":
                 return item.get("text")
-            # json blocks
             if item.get("type") == "json":
                 return item.get("data")
+        # If content[] exists but can't be interpreted, return envelope intact
         return result
 
-    # Legacy server envelope
-    if "data" in result:
-        return result["data"]
-
-    # Raw payload
+    # Legacy envelopes: DO NOT unwrap `data` anymore
+    # (This preserves status + metrics needed for guardrails)
     return result
+
 
 
 # ---------------------------------------------------------------------------

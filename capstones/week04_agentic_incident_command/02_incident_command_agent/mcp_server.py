@@ -1,6 +1,6 @@
 # ======================================================================
 # MCP server for the Incident Command Agent (Week 04)
-# With Fix #6, Fix #7, and Fix #8 (A) applied
+# With Fix #5A, Fix #6, Fix #7, and Fix #8(A) applied
 # ======================================================================
 
 from __future__ import annotations
@@ -123,7 +123,7 @@ def _envelope(data: Dict[str, Any], latency_ms: int, cost_tokens: int = 10):
 
 
 # ---------------------------------------------------------------------------
-# Tool handlers (unchanged)
+# Tool handlers (existing + Fix #5A)
 # ---------------------------------------------------------------------------
 
 def tool_retrieve_runbook(arguments: Dict[str, Any]):
@@ -171,9 +171,25 @@ def tool_summarize_incident(arguments: Dict[str, Any], memory: IncidentMemorySto
     return _envelope({"summary": summary, "citations": evidence}, latency_ms=6)
 
 
+# 👉 NEW: Fix #5A – Write OPAL plan into memory://plans/current
+def tool_write_plan(arguments: Dict[str, Any], memory: IncidentMemoryStore):
+    plan = arguments.get("plan", [])
+    memory.write_plan(plan)
+    return _envelope({"written": True, "plan_length": len(plan)}, latency_ms=1)
+
+
+# ---------------------------------------------------------------------------
+# TOOL_DISPATCH with Fix #5A
+# ---------------------------------------------------------------------------
+
 TOOL_DISPATCH = {
     "retrieve_runbook": tool_retrieve_runbook,
     "run_diagnostic": tool_run_diagnostic,
+    "summarize_incident": tool_summarize_incident,
+    "create_incident": None,   # handled dynamically
+    "add_evidence": None,      # handled dynamically
+    "append_delta": None,      # handled dynamically
+    "write_plan": tool_write_plan,  # <-- NEW FIX #5A
 }
 
 
@@ -209,10 +225,11 @@ def get_resource(memory: IncidentMemoryStore, uri: str, cursor=None):
 
 
 def call_tool(memory, name, arguments):
-    if name in TOOL_DISPATCH:
-        return TOOL_DISPATCH[name](arguments)
+    # Fix #5A – route correctly to new write_plan tool
+    if name == "write_plan":
+        return tool_write_plan(arguments, memory)
 
-    if name == "summarize_incident":
+    if name in ("summarize_incident",):
         return tool_summarize_incident(arguments, memory)
 
     if name == "create_incident":
@@ -228,11 +245,15 @@ def call_tool(memory, name, arguments):
         result = memory.append_delta(arguments)
         return _envelope(result, latency_ms=2)
 
+    # Normal tools
+    if name in TOOL_DISPATCH and TOOL_DISPATCH[name] is not None:
+        return TOOL_DISPATCH[name](arguments)
+
     raise ValueError(f"Unknown tool '{name}'")
 
 
 # ---------------------------------------------------------------------------
-# JSON-RPC session with Fix #8 latency + budget consumption
+# JSON-RPC session — unchanged except latency + budget (Fix #8)
 # ---------------------------------------------------------------------------
 
 def _validation_error_response(req_id, details):
@@ -249,9 +270,6 @@ async def handle_session(ws, logger, memory):
 
     async for raw in ws:
 
-        # -------------------------------------------------------------
-        # Parse errors (Fix #6)
-        # -------------------------------------------------------------
         try:
             request = json.loads(raw)
         except Exception:
@@ -296,9 +314,7 @@ async def handle_session(ws, logger, memory):
         phase = "observe" if method in ("initialize", "getResource") else "act"
         status = "ok"
 
-        # -------------------------------------------------------------
-        # Measure full handling latency (Fix #8)
-        # -------------------------------------------------------------
+        # timing
         start_time = time.perf_counter()
 
         try:
@@ -333,7 +349,6 @@ async def handle_session(ws, logger, memory):
 
                 latency_ms, result = timed(call_tool, memory, name, arguments)
 
-                # Budget consumption (Fix #8 Option A)
                 SERVER_BUDGET.tokens -= 10
                 SERVER_BUDGET.ms -= latency_ms
 
@@ -357,9 +372,6 @@ async def handle_session(ws, logger, memory):
 
         full_latency_ms = int((time.perf_counter() - start_time) * 1000)
 
-        # -------------------------------------------------------------
-        # Telemetry logging (Fix #8)
-        # -------------------------------------------------------------
         logger.log(
             TelemetryEvent(
                 correlation_id=ctx.correlation_id,
