@@ -39,35 +39,39 @@ Each week builds a complete, self-contained project with a clean software-engine
 
 ```text
 the_ai_engineer
-├── assets
-│   └── tae_logo.png
-├── capstones
-│   ├── week01_gd_optimization            # Gradient Descent capstone
-│   │   ├── gd_capstone.ipynb
-│   │   └── README_week01_capstone.md
-│   ├── week02_backprop                   # Backpropagation capstone
-│   │   ├── 01_numpy_manual.ipynb
-│   │   ├── 02_pytorch_no_autograd.ipynb
-│   │   ├── 03_pytorch_autograd.ipynb
-│   │   ├── 04_pytorch_nn_module.ipynb
-│   │   └── README_week02_capstone.md
-│   ├── week03_transformers               # Tiny Transformer capstone
-│   │   ├── mini_gpt_diagnostics.ipynb
-│   │   ├── mini_gpt.pt
-│   │   ├── mini_transformer.py
-│   │   ├── multihead_attention.py
-│   │   ├── scaled_dot_product_attention.py
-│   │   ├── train_mini_gpt.py
-│   │   ├── transformer_block.py
-│   │   └── README_week03_capstone.md
-│   └── week04_agentic_incident_command   # MCP/Agent demo + OPAL loop
-│       ├── 01_tool_harness
-│       ├── 02_incident_command_agent
-│       ├── artifacts
-│       ├── samples
-│       └── README_week04_capstone.md
-├── README.md
-└── requirements.txt
+    ├── assets
+    │   ├── mcp_server_startup.png
+    │   ├── remote_opal_loop.png
+    │   ├── tae_logo.png
+    │   └── telemetry_jsonl_confirmation.png
+    ├── capstones
+    │   ├── week01_gd_optimization                # Gradient Descent capstone
+    │   │   ├── gd_capstone.ipynb
+    │   │   └── README_week01_capstone.md
+    │   ├── week02_backprop                       # Backpropagation capstone
+    │   │   ├── 01_numpy_manual.ipynb
+    │   │   ├── 02_pytorch_no_autograd.ipynb
+    │   │   ├── 03_pytorch_autograd.ipynb
+    │   │   ├── 04_pytorch_nn_module.ipynb
+    │   │   └── README_week02_capstone.md
+    │   ├── week03_transformers                   # Tiny Transformer capstone
+    │   │   ├── mini_gpt_diagnostics.ipynb
+    │   │   ├── mini_gpt.pt
+    │   │   ├── mini_transformer.py
+    │   │   ├── multihead_attention.py
+    │   │   ├── README_week03_capstone.md
+    │   │   ├── scaled_dot_product_attention.py
+    │   │   ├── train_mini_gpt.py
+    │   │   └── transformer_block.py
+    │   └── week04_agentic_incident_command       # MCP/Agent demo + OPAL loop
+    │       ├── 01_tool_harness
+    │       ├── 02_incident_command_agent
+    │       ├── artifacts
+    │       ├── README_week04_capstone.md
+    │       └── samples
+    ├── README.md
+    └── requirements.txt
+
 ```
 ---
 

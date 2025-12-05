@@ -55,7 +55,7 @@ All experiments are one-dimensional, enabling direct visualization of optimizati
   – GD step-size sweep (quadratic)  
   – Cubic function and derivative  
   – GD trajectories from multiple initializations  
-  – SGD vs. diminishing-SGD trajectoriess  
+  – SGD vs. diminishing-SGD trajectories
 
 ---
 
